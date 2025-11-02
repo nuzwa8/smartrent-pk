@@ -2424,5 +2424,261 @@
 	}
 
 	/** Part 7 — Yahan khatam hua */
-	/** Part 1 — Yahan khatam hua */
+/**
+	 * Part 8 — Suppliers Screen
+	 * (Suppliers) (template) ko (mount) karta hai, (list) (fetch) karta hai, aur (CRUD) (handle) karta hai.
+	 * (Yeh (Purchases) screen se (Quick Add) ke liye bhi istemal hota hai)
+	 */
+	function initSuppliers() {
+		const tmpl = document.getElementById('rsam-tmpl-suppliers');
+		if (!tmpl) {
+			showError('Suppliers template not found.');
+			return;
+		}
+
+		// (Template) ko (mount) karein
+		const content = mountTemplate(tmpl);
+		state.ui.root.innerHTML = ''; // (Loading placeholder) ko (remove) karein
+		state.ui.root.appendChild(content);
+
+		// (UI Elements) ko (cache) karein
+		const ui = {
+			tableBody: state.ui.root.querySelector(
+				'#rsam-suppliers-table-body'
+			),
+			pagination: state.ui.root.querySelector(
+				'#rsam-suppliers-pagination'
+			),
+			search: state.ui.root.querySelector('#rsam-supplier-search'),
+			addNewBtn: state.ui.root.querySelector('#rsam-add-new-supplier'),
+			formContainer: state.ui.root.querySelector(
+				'#rsam-supplier-form-container'
+			),
+		};
+		// (UI) ko (state) mein (store) karein
+		state.ui.suppliers = ui;
+
+		// (Initial) (Suppliers) (fetch) karein
+		fetchSuppliers();
+
+		// (Event Listeners)
+		// (Search)
+		ui.search.addEventListener('keyup', (e) => {
+			clearTimeout(state.searchTimer);
+			state.searchTimer = setTimeout(() => {
+				state.currentSearch = e.target.value;
+				state.currentPage = 1;
+				fetchSuppliers();
+			}, 500);
+		});
+
+		// (Add New)
+		ui.addNewBtn.addEventListener('click', () => {
+			// (Callback) (function) (pass) karein (list) ko (refresh) karne ke liye
+			openSupplierForm(null, () => {
+				fetchSuppliers();
+			});
+		});
+	}
+
+	/**
+	 * (AJAX) ke zariye (Suppliers) (fetch) aur (render) karta hai.
+	 */
+	async function fetchSuppliers() {
+		const { tableBody, pagination, search } = state.ui.suppliers;
+		if (!tableBody) return;
+
+		// (Loading) (state)
+		tableBody.innerHTML = `<tr>
+            <td colspan="4" class="rsam-list-loading">
+                <span class="rsam-loader-spinner"></span> ${rsamData.strings.loading}
+            </td>
+        </tr>`;
+
+		try {
+			const data = await wpAjax('rsam_get_suppliers', {
+				page: state.currentPage,
+				search: search.value,
+			});
+
+			// (Table) (render) karein
+			renderSuppliersTable(data.suppliers);
+			// (Pagination) (render) karein
+			renderPagination(
+				pagination,
+				data.pagination,
+				(newPage) => {
+					state.currentPage = newPage;
+					fetchSuppliers();
+				}
+			);
+		} catch (error) {
+			showError(error, tableBody);
+		}
+	}
+
+	/**
+	 * (Suppliers) (data) ko (table) mein (render) karta hai.
+	 * @param {Array} suppliers (Suppliers) ka (array)
+	 */
+	function renderSuppliersTable(suppliers) {
+		const { tableBody } = state.ui.suppliers;
+		tableBody.innerHTML = ''; // (Clear) karein
+
+		if (!suppliers || suppliers.length === 0) {
+			tableBody.innerHTML = `<tr>
+                <td colspan="4" class="rsam-list-empty">
+                    ${rsamData.strings.noItemsFound}
+                </td>
+            </tr>`;
+			return;
+		}
+
+		suppliers.forEach((supplier) => {
+			const tr = document.createElement('tr');
+			tr.dataset.supplierId = supplier.id;
+			// (supplier) (object) ko (element) par (store) karein (edit) ke liye
+			tr.dataset.supplierData = JSON.stringify(supplier);
+
+			tr.innerHTML = `
+                <td>${escapeHtml(supplier.name)}</td>
+                <td>${escapeHtml(supplier.phone)}</td>
+                <td>${escapeHtml(supplier.address)}</td>
+                <td class="rsam-list-actions">
+                    <button type="button" class="button rsam-edit-btn" title="${rsamData.strings.edit}">
+                        <span class="dashicons dashicons-edit"></span>
+                    </button>
+                    <button type="button" class="button rsam-delete-btn" title="${rsamData.strings.delete}">
+                        <span class="dashicons dashicons-trash"></span>
+                    </button>
+                </td>
+            `;
+
+			// (Action Listeners)
+			tr.querySelector('.rsam-edit-btn').addEventListener(
+				'click',
+				(e) => {
+					const row = e.target.closest('tr');
+					const data = JSON.parse(row.dataset.supplierData);
+					// (List) (refresh) (callback)
+					openSupplierForm(data, () => {
+						fetchSuppliers();
+					});
+				}
+			);
+
+			tr.querySelector('.rsam-delete-btn').addEventListener(
+				'click',
+				(e) => {
+					const row = e.target.closest('tr');
+					const supplierId = row.dataset.supplierId;
+					const supplierName = row.cells[0].textContent;
+					confirmDeleteSupplier(supplierId, supplierName);
+				}
+			);
+
+			tableBody.appendChild(tr);
+		});
+	}
+
+	/**
+	 * (Add/Edit) (Supplier) (Form Modal) ko kholta hai.
+	 * (Isey (global) (window object) par (attach) karein taake (Purchases) screen isey (call) kar sake)
+	 * @param {object} [supplierData] (Edit) ke liye (Supplier) ka (data)
+	 * @param {function} [onSaveCallback] (Save) hone ke baad (callback) (jo (list refresh) karega ya (dropdown update) karega)
+	 */
+	function openSupplierForm(supplierData = null, onSaveCallback = null) {
+		// (Form container) (Suppliers) (template) ya (Customers) (template) se (find) karein
+		// (Yeh (logic) (refactor) kiya ja sakta hai, lekin (Purchases) screen mein (supplier template) nahi hai)
+		// Hum (Suppliers) (template) par (depend) karenge
+		const formContainer = document.getElementById(
+			'rsam-supplier-form-container'
+		);
+		if (!formContainer) {
+			showToast('Supplier form template not found.', 'error');
+			return;
+		}
+
+		const formHtml = formContainer.innerHTML;
+		const isEditing = supplierData !== null;
+
+		const title = isEditing
+			? `${rsamData.strings.edit} Supplier`
+			: `${rsamData.strings.addNew} Supplier`;
+
+		openModal(title, formHtml, async (e) => {
+			// (Save callback)
+			const saveBtn = e.target;
+			const form =
+				state.ui.modal.body.querySelector('#rsam-supplier-form');
+			if (form.checkValidity() === false) {
+				form.reportValidity();
+				return;
+			}
+
+			const formData = new URLSearchParams(new FormData(form)).toString();
+
+			try {
+				const result = await wpAjax(
+					'rsam_save_supplier',
+					{ form_data: formData },
+					saveBtn
+				);
+				showToast(result.message, 'success');
+				closeModal();
+				// (Callback) (run) karein (agar (defined) hai)
+				if (onSaveCallback) {
+					onSaveCallback(result.supplier); // (Naya/updated) (supplier object) (pass) karein
+				}
+			} catch (error) {
+				// (wpAjax) (toast) (show) kar dega
+			}
+		});
+
+		// (Modal) khulne ke baad (form) ko (populate) karein
+		if (isEditing) {
+			const form =
+				state.ui.modal.body.querySelector('#rsam-supplier-form');
+			form.querySelector('[name="supplier_id"]').value = supplierData.id;
+			form.querySelector('[name="name"]').value = supplierData.name;
+			form.querySelector('[name="phone"]').value = supplierData.phone;
+			form.querySelector('[name="address"]').value = supplierData.address;
+		}
+	}
+	// (Global) (function) (expose) karein (Purchases) (screen) ke liye
+	window.rsamOpenSupplierForm = openSupplierForm;
+
+	/**
+	 * (Supplier) ko (delete) karne ke liye (confirmation) (prompt) dikhata hai.
+	 * @param {string|number} supplierId
+	 * @param {string} supplierName
+	 */
+	function confirmDeleteSupplier(supplierId, supplierName) {
+		const title = `${rsamData.strings.delete} ${supplierName}?`;
+		const message = `Are you sure you want to delete "${supplierName}"? If this supplier is linked to purchases, deletion will fail.`;
+
+		openConfirmModal(title, message, async (e) => {
+			// (Delete callback)
+			const deleteBtn = e.target;
+			try {
+				const result = await wpAjax(
+					'rsam_delete_supplier',
+					{ supplier_id: supplierId },
+					deleteBtn
+				);
+				showToast(result.message, 'success');
+				closeConfirmModal();
+				fetchSuppliers(); // (List) (refresh) karein
+			} catch (error) {
+				// (wpAjax) (toast) (show) kar dega
+				closeConfirmModal();
+			}
+		});
+	}
+
+	/** Part 8 — Yahan khatam hua */
+
+
+		
+
 })(); // (IIFE) (close)
