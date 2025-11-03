@@ -1,8 +1,7 @@
-
 <?php
 /**
  * Plugin Name:       Retail Shop Accounting & Management
- * Description:        Complete accounting, inventory, and management solution for retail/grocery store.
+ * Description:       Complete accounting, inventory, and management solution for retail/grocery store.
  * Version:           1.0.0
  * Author:            Nuzhat waseem
  * Author URI:        https://coachproai.com
@@ -20,6 +19,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 // Plugin version aur text domain set karein
 define( 'RSAM_VERSION', '1.0.0' );
 define( 'RSAM_TEXT_DOMAIN', 'rsam-plugin' );
+
+/**
+ * ===================================================================
+ * === PHASE 1: PHP CODE - FILE (retail-shop-accounting.php) ===
+ * ===================================================================
+ */
 
 /**
  * Part 1 — Plugin Activation (Database Tables aur Roles)
@@ -47,7 +52,7 @@ register_activation_hook( __FILE__, 'rsam_activate_plugin' );
  */
 function rsam_get_table_names() {
 	global $wpdb;
-	return array(
+	return [
 		'products'          => $wpdb->prefix . 'rsam_products',
 		'product_batches'   => $wpdb->prefix . 'rsam_product_batches',
 		'purchases'         => $wpdb->prefix . 'rsam_purchases',
@@ -59,7 +64,7 @@ function rsam_get_table_names() {
 		'suppliers'         => $wpdb->prefix . 'rsam_suppliers',
 		'customers'         => $wpdb->prefix . 'rsam_customers',
 		'customer_payments' => $wpdb->prefix . 'rsam_customer_payments',
-	);
+	];
 }
 
 /**
@@ -67,7 +72,7 @@ function rsam_get_table_names() {
  */
 function rsam_create_database_tables() {
 	global $wpdb;
-	$tables          = rsam_get_table_names();
+	$tables      = rsam_get_table_names();
 	$charset_collate = $wpdb->get_charset_collate();
 	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
@@ -225,7 +230,7 @@ function rsam_create_database_tables() {
 	) $charset_collate;";
 	dbDelta( $sql_customers );
 
-	// Customer Payments Table (FIXED: Added missing table)
+	// Customer Payments Table
 	$sql_customer_payments = "CREATE TABLE {$tables['customer_payments']} (
 		id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 		customer_id BIGINT(20) UNSIGNED NOT NULL,
@@ -248,15 +253,15 @@ function rsam_create_roles() {
 	add_role(
 		'shop_staff',
 		__( 'Shop Staff', RSAM_TEXT_DOMAIN ),
-		array(
-			'read'                   => true,
-			'rsam_view_dashboard'    => true,
-			'rsam_manage_products'   => true,
-			'rsam_manage_purchases'  => true,
-			'rsam_manage_sales'      => true,
-			'rsam_manage_customers'  => true,
-			'rsam_manage_suppliers'  => true,
-		)
+		[
+			'read'                  => true,
+			'rsam_view_dashboard'   => true,
+			'rsam_manage_products'  => true,
+			'rsam_manage_purchases' => true,
+			'rsam_manage_sales'     => true,
+			'rsam_manage_customers' => true,
+			'rsam_manage_suppliers' => true,
+		]
 	);
 
 	// 'Administrator' role ko (permissions) dein
@@ -350,7 +355,6 @@ function rsam_admin_menus() {
 		'rsam-dashboard',
 		__( 'Purchases', RSAM_TEXT_DOMAIN ),
 		__( 'Purchases', RSAM_TEXT_DOMAIN ),
-		'rsam_manage_purchases',
 		'rsam-purchases',
 		'rsam_render_admin_page'
 	);
@@ -360,7 +364,6 @@ function rsam_admin_menus() {
 		'rsam-dashboard',
 		__( 'Sales', RSAM_TEXT_DOMAIN ),
 		__( 'Sales', RSAM_TEXT_DOMAIN ),
-		'rsam_manage_sales',
 		'rsam-sales',
 		'rsam_render_admin_page'
 	);
@@ -370,7 +373,6 @@ function rsam_admin_menus() {
 		'rsam-dashboard',
 		__( 'Expenses', RSAM_TEXT_DOMAIN ),
 		__( 'Expenses', RSAM_TEXT_DOMAIN ),
-		'rsam_manage_expenses',
 		'rsam-expenses',
 		'rsam_render_admin_page'
 	);
@@ -390,7 +392,6 @@ function rsam_admin_menus() {
 		'rsam-dashboard',
 		__( 'Suppliers', RSAM_TEXT_DOMAIN ),
 		__( 'Suppliers', RSAM_TEXT_DOMAIN ),
-		'rsam_manage_suppliers',
 		'rsam-suppliers',
 		'rsam_render_admin_page'
 	);
@@ -400,7 +401,6 @@ function rsam_admin_menus() {
 		'rsam-dashboard',
 		__( 'Customers (Khata)', RSAM_TEXT_DOMAIN ),
 		__( 'Customers', RSAM_TEXT_DOMAIN ),
-		'rsam_manage_customers',
 		'rsam-customers',
 		'rsam_render_admin_page'
 	);
@@ -443,7 +443,7 @@ function rsam_admin_enqueue_scripts( $hook_suffix ) {
 	wp_enqueue_style(
 		'rsam-admin-style',
 		$plugin_url . 'assets/rsam-admin.css',
-		array(),
+		[],
 		$version
 	);
 
@@ -451,7 +451,7 @@ function rsam_admin_enqueue_scripts( $hook_suffix ) {
 	wp_enqueue_script(
 		'rsam-admin-script',
 		$plugin_url . 'assets/rsam-admin.js',
-		array( 'jquery', 'jquery-ui-autocomplete' ),
+		[ 'jquery', 'jquery-ui-autocomplete' ],
 		$version,
 		true
 	);
@@ -468,7 +468,7 @@ function rsam_localize_script_data() {
 	$current_user = wp_get_current_user();
 	
 	// User ki (capabilities) ka (map)
-	$user_caps = array(
+	$user_caps = [
 		'canManageProducts'  => current_user_can( 'rsam_manage_products' ),
 		'canManagePurchases' => current_user_can( 'rsam_manage_purchases' ),
 		'canManageSales'     => current_user_can( 'rsam_manage_sales' ),
@@ -478,16 +478,16 @@ function rsam_localize_script_data() {
 		'canManageCustomers' => current_user_can( 'rsam_manage_customers' ),
 		'canViewReports'     => current_user_can( 'rsam_view_reports' ),
 		'canManageSettings'  => current_user_can( 'rsam_manage_settings' ),
-	);
+	];
 
 	wp_localize_script(
 		'rsam-admin-script',
 		'rsamData',
-		array(
+		[
 			'ajax_url' => admin_url( 'admin-ajax.php' ),
 			'nonce'    => wp_create_nonce( 'rsam-ajax-nonce' ),
 			'caps'     => $user_caps,
-			'strings'  => array(
+			'strings'  => [
 				'loading'              => __( 'Loading...', RSAM_TEXT_DOMAIN ),
 				'errorOccurred'        => __( 'An error occurred. Please try again.', RSAM_TEXT_DOMAIN ),
 				'confirmDelete'        => __( 'Are you sure you want to delete this?', RSAM_TEXT_DOMAIN ),
@@ -502,8 +502,19 @@ function rsam_localize_script_data() {
 				'save'                 => __( 'Save', RSAM_TEXT_DOMAIN ),
 				'cancel'               => __( 'Cancel', RSAM_TEXT_DOMAIN ),
 				'close'                => __( 'Close', RSAM_TEXT_DOMAIN ),
-			),
-		)
+				// Dashboard strings
+				'todaySales'           => __( 'Today\'s Sales', RSAM_TEXT_DOMAIN ),
+				'monthlySales'         => __( 'This Month\'s Sales', RSAM_TEXT_DOMAIN ),
+				'monthlyProfit'        => __( 'This Month\'s Profit', RSAM_TEXT_DOMAIN ),
+				'monthlyExpenses'      => __( 'This Month\'s Expenses', RSAM_TEXT_DOMAIN ),
+				'stockValue'           => __( 'Total Stock Value', RSAM_TEXT_DOMAIN ),
+				'lowStockItems'        => __( 'Low Stock Items', RSAM_TEXT_DOMAIN ),
+				'unitsSold'            => __( 'units sold', RSAM_TEXT_DOMAIN ),
+				'inStock'              => __( 'In Stock:', RSAM_TEXT_DOMAIN ),
+				'noTopProducts'        => __( 'No top selling products this month.', RSAM_TEXT_DOMAIN ),
+				'allStockGood'         => __( 'All stock levels are good.', RSAM_TEXT_DOMAIN ),
+			],
+		]
 	);
 }
 
@@ -575,7 +586,7 @@ function rsam_template_dashboard() {
 					<?php if ( current_user_can( 'rsam_manage_sales' ) ) : ?>
 						<a href="<?php echo esc_url( admin_url( 'admin.php?page=rsam-sales' ) ); ?>" class="button button-primary button-hero">
 							<span class="dashicons dashicons-cart"></span>
-							<?php esc_html_e( 'New Sale', RSAM_TEXT_DOMAIN ); ?>
+							<?php esc_html_e( 'New Sale (POS)', RSAM_TEXT_DOMAIN ); ?>
 						</a>
 					<?php endif; ?>
 					<?php if ( current_user_can( 'rsam_manage_purchases' ) ) : ?>
@@ -656,8 +667,7 @@ function rsam_template_common_ui() {
 			<div class="rsam-modal-content">
 				<div class="rsam-modal-header">
 					<h3 class="rsam-modal-title"><?php esc_html_e( 'Are you sure?', RSAM_TEXT_DOMAIN ); ?></h3>
-					<button type="button" class="rsam-modal-close dashicons dash
-icons-no-alt"></button>
+					<button type="button" class="rsam-modal-close dashicons dashicons-no-alt"></button>
 				</div>
 				<div class="rsam-modal-body">
 					<p class="rsam-confirm-text"><?php esc_html_e( 'Are you sure you want to delete this item? This action cannot be undone.', RSAM_TEXT_DOMAIN ); ?></p>
@@ -681,7 +691,7 @@ icons-no-alt"></button>
 function rsam_ajax_get_dashboard_stats() {
 	check_ajax_referer( 'rsam-ajax-nonce', 'nonce' );
 	if ( ! current_user_can( 'rsam_view_dashboard' ) ) {
-		wp_send_json_error( array( 'message' => __( 'You do not have permission to view this data.', RSAM_TEXT_DOMAIN ) ), 403 );
+		wp_send_json_error( [ 'message' => __( 'You do not have permission to view this data.', RSAM_TEXT_DOMAIN ) ], 403 );
 	}
 
 	global $wpdb;
@@ -742,7 +752,7 @@ function rsam_ajax_get_dashboard_stats() {
 		 LIMIT 5"
 	);
 
-	$stats = array(
+	$stats = [
 		'today_sales'      => rsam_format_price( $today_sales ),
 		'monthly_sales'    => rsam_format_price( $monthly_sales ),
 		'monthly_profit'   => rsam_format_price( $monthly_profit ),
@@ -751,7 +761,7 @@ function rsam_ajax_get_dashboard_stats() {
 		'low_stock_count'  => (int) $low_stock_count,
 		'top_products'     => $top_products,
 		'low_stock_products' => $low_stock_products,
-	);
+	];
 
 	wp_send_json_success( $stats );
 }
@@ -763,6 +773,12 @@ add_action( 'wp_ajax_rsam_get_dashboard_stats', 'rsam_ajax_get_dashboard_stats' 
 function rsam_format_price( $price ) {
 	$currency_symbol = __( 'Rs.', RSAM_TEXT_DOMAIN );
 	$price = (float) $price;
+	// Optional: Get currency symbol from settings if available
+	$settings = get_option( 'rsam_settings', [] );
+	if ( ! empty( $settings['currency_symbol'] ) ) {
+		$currency_symbol = $settings['currency_symbol'];
+	}
+
 	return $currency_symbol . ' ' . number_format( $price, 2 );
 }
 
@@ -865,7 +881,7 @@ function rsam_template_products() {
 function rsam_ajax_get_products() {
 	check_ajax_referer( 'rsam-ajax-nonce', 'nonce' );
 	if ( ! current_user_can( 'rsam_manage_products' ) ) {
-		wp_send_json_error( array( 'message' => __( 'You do not have permission.', RSAM_TEXT_DOMAIN ) ), 403 );
+		wp_send_json_error( [ 'message' => __( 'You do not have permission.', RSAM_TEXT_DOMAIN ) ], 403 );
 	}
 
 	global $wpdb;
@@ -878,7 +894,7 @@ function rsam_ajax_get_products() {
 	$search = isset( $_POST['search'] ) ? sanitize_text_field( wp_unslash( $_POST['search'] ) ) : '';
 
 	$where_clause = '';
-	$params = array();
+	$params = [];
 	if ( ! empty( $search ) ) {
 		$where_clause = ' WHERE p.name LIKE %s';
 		$params[] = '%' . $wpdb->esc_like( $search ) . '%';
@@ -889,7 +905,7 @@ function rsam_ajax_get_products() {
 		empty( $params ) ? $count_query : $wpdb->prepare( $count_query, $params )
 	);
 
-	$query_parts = array(
+	$query_parts = [
 		"SELECT 
 			p.id, 
 			p.name, 
@@ -909,10 +925,10 @@ function rsam_ajax_get_products() {
 		ORDER BY p.name ASC
 		LIMIT %d
 		OFFSET %d"
-	);
+	];
 	
 	$query = implode( ' ', $query_parts );
-	$query_params = array_merge( $params, array( $limit, $offset ) );
+	$query_params = array_merge( $params, [ $limit, $offset ] );
 	$products = $wpdb->get_results( $wpdb->prepare( $query, $query_params ) );
 	
 	foreach ( $products as $product ) {
@@ -921,14 +937,14 @@ function rsam_ajax_get_products() {
 		$product->stock_value_formatted = rsam_format_price( $product->stock_value );
 	}
 
-	wp_send_json_success( array(
+	wp_send_json_success( [
 		'products'   => $products,
-		'pagination' => array(
+		'pagination' => [
 			'total_items' => (int) $total_items,
 			'total_pages' => ceil( $total_items / $limit ),
 			'current_page' => $page,
-		),
-	) );
+		],
+	] );
 }
 add_action( 'wp_ajax_rsam_get_products', 'rsam_ajax_get_products' );
 
@@ -938,10 +954,10 @@ add_action( 'wp_ajax_rsam_get_products', 'rsam_ajax_get_products' );
 function rsam_ajax_save_product() {
 	check_ajax_referer( 'rsam-ajax-nonce', 'nonce' );
 	if ( ! current_user_can( 'rsam_manage_products' ) ) {
-		wp_send_json_error( array( 'message' => __( 'You do not have permission.', RSAM_TEXT_DOMAIN ) ), 403 );
+		wp_send_json_error( [ 'message' => __( 'You do not have permission.', RSAM_TEXT_DOMAIN ) ], 403 );
 	}
 
-	parse_str( $_POST['form_data'], $data );
+	parse_str( wp_unslash( $_POST['form_data'] ), $data );
 
 	$product_id = isset( $data['product_id'] ) ? absint( $data['product_id'] ) : 0;
 	$name = isset( $data['name'] ) ? sanitize_text_field( $data['name'] ) : '';
@@ -952,30 +968,30 @@ function rsam_ajax_save_product() {
 	$has_expiry = isset( $data['has_expiry'] ) ? 1 : 0;
 
 	if ( empty( $name ) || empty( $unit_type ) || $selling_price < 0 ) {
-		wp_send_json_error( array( 'message' => __( 'Please fill all required fields correctly.', RSAM_TEXT_DOMAIN ) ), 400 );
+		wp_send_json_error( [ 'message' => __( 'Please fill all required fields correctly.', RSAM_TEXT_DOMAIN ) ], 400 );
 	}
 
 	global $wpdb;
 	$tables = rsam_get_table_names();
 
-	$db_data = array(
+	$db_data = [
 		'name'                => $name,
 		'category'            => $category,
 		'unit_type'           => $unit_type,
 		'selling_price'       => $selling_price,
 		'low_stock_threshold' => $low_stock_threshold,
 		'has_expiry'          => $has_expiry,
-	);
+	];
 	
-	$db_formats = array( '%s', '%s', '%s', '%f', '%f', '%d' );
+	$db_formats = [ '%s', '%s', '%s', '%f', '%f', '%d' ];
 
 	if ( $product_id > 0 ) {
 		$result = $wpdb->update(
 			$tables['products'],
 			$db_data,
-			array( 'id' => $product_id ),
+			[ 'id' => $product_id ],
 			$db_formats,
-			array( '%d' )
+			[ '%d' ]
 		);
 		$message = __( 'Product updated successfully.', RSAM_TEXT_DOMAIN );
 	} else {
@@ -992,10 +1008,10 @@ function rsam_ajax_save_product() {
 	}
 
 	if ( $result === false ) {
-		wp_send_json_error( array( 'message' => __( 'Database error. Could not save product.', RSAM_TEXT_DOMAIN ) ), 500 );
+		wp_send_json_error( [ 'message' => __( 'Database error. Could not save product.', RSAM_TEXT_DOMAIN ) ], 500 );
 	}
 
-	wp_send_json_success( array( 'message' => $message, 'product_id' => $product_id ) );
+	wp_send_json_success( [ 'message' => $message, 'product_id' => $product_id ] );
 }
 add_action( 'wp_ajax_rsam_save_product', 'rsam_ajax_save_product' );
 
@@ -1005,13 +1021,13 @@ add_action( 'wp_ajax_rsam_save_product', 'rsam_ajax_save_product' );
 function rsam_ajax_delete_product() {
 	check_ajax_referer( 'rsam-ajax-nonce', 'nonce' );
 	if ( ! current_user_can( 'rsam_manage_products' ) ) {
-		wp_send_json_error( array( 'message' => __( 'You do not have permission.', RSAM_TEXT_DOMAIN ) ), 403 );
+		wp_send_json_error( [ 'message' => __( 'You do not have permission.', RSAM_TEXT_DOMAIN ) ], 403 );
 	}
 
 	$product_id = isset( $_POST['product_id'] ) ? absint( $_POST['product_id'] ) : 0;
 
 	if ( $product_id <= 0 ) {
-		wp_send_json_error( array( 'message' => __( 'Invalid Product ID.', RSAM_TEXT_DOMAIN ) ), 400 );
+		wp_send_json_error( [ 'message' => __( 'Invalid Product ID.', RSAM_TEXT_DOMAIN ) ], 400 );
 	}
 
 	global $wpdb;
@@ -1022,17 +1038,17 @@ function rsam_ajax_delete_product() {
 	) );
 	
 	if ( (float) $stock > 0 ) {
-		wp_send_json_error( array( 'message' => __( 'Cannot delete. This product still has stock. Please adjust stock to 0 first.', RSAM_TEXT_DOMAIN ) ), 400 );
+		wp_send_json_error( [ 'message' => __( 'Cannot delete. This product still has stock. Please adjust stock to 0 first.', RSAM_TEXT_DOMAIN ) ], 400 );
 	}
 
-	$wpdb->delete( $tables['product_batches'], array( 'product_id' => $product_id ), array( '%d' ) );
+	$wpdb->delete( $tables['product_batches'], [ 'product_id' => $product_id ], [ '%d' ] );
 
-	$result = $wpdb->delete( $tables['products'], array( 'id' => $product_id ), array( '%d' ) );
+	$result = $wpdb->delete( $tables['products'], [ 'id' => $product_id ], [ '%d' ] );
 
 	if ( $result ) {
-		wp_send_json_success( array( 'message' => __( 'Product deleted successfully.', RSAM_TEXT_DOMAIN ) ) );
+		wp_send_json_success( [ 'message' => __( 'Product deleted successfully.', RSAM_TEXT_DOMAIN ) ] );
 	} else {
-		wp_send_json_error( array( 'message' => __( 'Could not delete product.', RSAM_TEXT_DOMAIN ) ), 500 );
+		wp_send_json_error( [ 'message' => __( 'Could not delete product.', RSAM_TEXT_DOMAIN ) ], 500 );
 	}
 }
 add_action( 'wp_ajax_rsam_delete_product', 'rsam_ajax_delete_product' );
@@ -1043,7 +1059,7 @@ add_action( 'wp_ajax_rsam_delete_product', 'rsam_ajax_delete_product' );
 function rsam_ajax_search_products() {
 	check_ajax_referer( 'rsam-ajax-nonce', 'nonce' );
 	if ( ! current_user_can( 'rsam_manage_sales' ) && ! current_user_can( 'rsam_manage_purchases' ) ) {
-		wp_send_json_error( array( 'message' => __( 'You do not have permission.', RSAM_TEXT_DOMAIN ) ), 403 );
+		wp_send_json_error( [ 'message' => __( 'You do not have permission.', RSAM_TEXT_DOMAIN ) ], 403 );
 	}
 
 	global $wpdb;
@@ -1052,7 +1068,7 @@ function rsam_ajax_search_products() {
 	$search = isset( $_GET['term'] ) ? sanitize_text_field( wp_unslash( $_GET['term'] ) ) : '';
 
 	if ( empty( $search ) ) {
-		wp_send_json_success( array() );
+		wp_send_json_success( [] );
 	}
 
 	$query = $wpdb->prepare(
@@ -1065,9 +1081,9 @@ function rsam_ajax_search_products() {
 	
 	$products = $wpdb->get_results( $query );
 
-	$results = array();
+	$results = [];
 	foreach ( $products as $product ) {
-		$results[] = array(
+		$results[] = [
 			'id'    => $product->id,
 			'label' => sprintf(
 				'%s (%s) - %s',
@@ -1077,7 +1093,7 @@ function rsam_ajax_search_products() {
 			),
 			'value' => $product->name,
 			'data'  => $product,
-		);
+		];
 	}
 	
 	wp_send_json_success( $results );
@@ -1085,4 +1101,2731 @@ function rsam_ajax_search_products() {
 add_action( 'wp_ajax_rsam_search_products', 'rsam_ajax_search_products' );
 
 
+/**
+ * Part 5 — Purchases (Templates)
+ */
+
+/**
+ * Purchases Screen ke liye (HTML <template>)
+ */
+function rsam_template_purchases() {
+	?>
+	<template id="rsam-tmpl-purchases">
+		
+		<div id="rsam-purchase-list-view">
+			<div class="rsam-screen-header">
+				<h1><?php esc_html_e( 'Purchases Ledger', RSAM_TEXT_DOMAIN ); ?></h1>
+				<button type="button" class="button button-primary" id="rsam-add-new-purchase">
+					<span class="dashicons dashicons-plus-alt"></span>
+					<?php esc_html_e( 'Record New Purchase', RSAM_TEXT_DOMAIN ); ?>
+				</button>
+			</div>
+
+			<div class="rsam-list-controls">
+				<input type="search" id="rsam-purchase-search" class="rsam-search-field" placeholder="<?php esc_attr_e( 'Search by Invoice or Supplier...', RSAM_TEXT_DOMAIN ); ?>">
+			</div>
+
+			<div class="rsam-list-table-wrapper">
+				<table class="rsam-list-table" id="rsam-purchases-table">
+					<thead>
+						<tr>
+							<th><?php esc_html_e( 'Invoice / ID', RSAM_TEXT_DOMAIN ); ?></th>
+							<th><?php esc_html_e( 'Supplier', RSAM_TEXT_DOMAIN ); ?></th>
+							<th><?php esc_html_e( 'Purchase Date', RSAM_TEXT_DOMAIN ); ?></th>
+							<th><?php esc_html_e( 'Total Amount', RSAM_TEXT_DOMAIN ); ?></th>
+							<th><?php esc_html_e( 'Actions', RSAM_TEXT_DOMAIN ); ?></th>
+						</tr>
+					</thead>
+					<tbody id="rsam-purchases-table-body">
+						<tr>
+							<td colspan="5" class="rsam-list-loading">
+								<span class="rsam-loader-spinner"></span> <?php esc_html_e( 'Loading purchases...', RSAM_TEXT_DOMAIN ); ?>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<div class="rsam-pagination" id="rsam-purchases-pagination">
+				</div>
+		</div>
+
+		<div id="rsam-purchase-form-view" style="display: none;">
+			
+			<div class="rsam-screen-header">
+				<h1 id="rsam-purchase-form-title"><?php esc_html_e( 'Record New Purchase', RSAM_TEXT_DOMAIN ); ?></h1>
+				<button type="button" class="button" id="rsam-back-to-purchase-list">
+					<span class="dashicons dashicons-arrow-left-alt"></span>
+					<?php esc_html_e( 'Back to Purchases Ledger', RSAM_TEXT_DOMAIN ); ?>
+				</button>
+			</div>
+
+			<form id="rsam-purchase-form" class="rsam-form">
+				<input type="hidden" name="purchase_id" value="0">
+				
+				<div class="rsam-card">
+					<h3><?php esc_html_e( 'Invoice Details', RSAM_TEXT_DOMAIN ); ?></h3>
+					<div class="rsam-form-grid">
+						<div class="rsam-form-field">
+							<label for="rsam-purchase-date"><?php esc_html_e( 'Purchase Date', RSAM_TEXT_DOMAIN ); ?> <span class="rsam-required">*</span></label>
+							<input type="date" id="rsam-purchase-date" name="purchase_date" required>
+						</div>
+						<div class="rsam-form-field">
+							<label for="rsam-purchase-invoice"><?php esc_html_e( 'Invoice Number', RSAM_TEXT_DOMAIN ); ?></label>
+							<input type="text" id="rsam-purchase-invoice" name="invoice_number" placeholder="<?php esc_attr_e( 'e.g., INV-00123', RSAM_TEXT_DOMAIN ); ?>">
+						</div>
+					</div>
+					<div class="rsam-form-field rsam-form-field-inline">
+						<label for="rsam-purchase-supplier"><?php esc_html_e( 'Supplier', RSAM_TEXT_DOMAIN ); ?></label>
+						<select id="rsam-purchase-supplier" name="supplier_id" class="rsam-supplier-search-select">
+							<option value="0"><?php esc_html_e( 'N/A (Cash Purchase)', RSAM_TEXT_DOMAIN ); ?></option>
+							</select>
+						<button type="button" class="button button-small rsam-quick-add" data-type="supplier" title="<?php esc_attr_e( 'Add New Supplier', RSAM_TEXT_DOMAIN ); ?>"><span class="dashicons dashicons-plus-alt"></span></button>
+					</div>
+				</div>
+
+				<div class="rsam-card">
+					<h3><?php esc_html_e( 'Products Detail', RSAM_TEXT_DOMAIN ); ?></h3>
+					<div class="rsam-form-field">
+						<label for="rsam-purchase-product-search"><?php esc_html_e( 'Search Product to Add', RSAM_TEXT_DOMAIN ); ?></label>
+						<input type="text" id="rsam-purchase-product-search" placeholder="<?php esc_attr_e( 'Type product name or category...', RSAM_TEXT_DOMAIN ); ?>">
+					</div>
+
+					<div class="rsam-list-table-wrapper">
+						<table class="rsam-list-table" id="rsam-purchase-items-table">
+							<thead>
+								<tr>
+									<th style="width: 30%;"><?php esc_html_e( 'Product', RSAM_TEXT_DOMAIN ); ?></th>
+									<th style="width: 15%;"><?php esc_html_e( 'Qty', RSAM_TEXT_DOMAIN ); ?></th>
+									<th style="width: 15%;"><?php esc_html_e( 'Purchase Price', RSAM_TEXT_DOMAIN ); ?></th>
+									<th style="width: 15%;"><?php esc_html_e( 'Expiry Date', RSAM_TEXT_DOMAIN ); ?></th>
+									<th style="width: 15%;"><?php esc_html_e( 'Subtotal', RSAM_TEXT_DOMAIN ); ?></th>
+									<th style="width: 10%;"><?php esc_html_e( 'Action', RSAM_TEXT_DOMAIN ); ?></th>
+								</tr>
+							</thead>
+							<tbody id="rsam-purchase-items-body">
+								<tr class="rsam-no-items-row">
+									<td colspan="6"><?php esc_html_e( 'No items added.', RSAM_TEXT_DOMAIN ); ?></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+
+				<div class="rsam-card rsam-form-grid">
+					<div>
+						<h3><?php esc_html_e( 'Notes', RSAM_TEXT_DOMAIN ); ?></h3>
+						<div class="rsam-form-field">
+							<textarea id="rsam-purchase-notes" name="notes" rows="3" placeholder="<?php esc_attr_e( 'Notes about the purchase...', RSAM_TEXT_DOMAIN ); ?>"></textarea>
+						</div>
+					</div>
+
+					<div>
+						<h3><?php esc_html_e( 'Summary', RSAM_TEXT_DOMAIN ); ?></h3>
+						<div class="rsam-summary-row">
+							<span><?php esc_html_e( 'Items Subtotal', RSAM_TEXT_DOMAIN ); ?></span>
+							<input type="text" id="rsam-purchase-subtotal" value="<?php echo esc_attr( rsam_format_price( 0 ) ); ?>" readonly>
+						</div>
+						<div class="rsam-summary-row rsam-form-field-inline">
+							<label for="rsam-purchase-additional-costs"><?php esc_html_e( 'Additional Costs (e.g., Freight, Tax)', RSAM_TEXT_DOMAIN ); ?></label>
+							<input type="number" id="rsam-purchase-additional-costs" name="additional_costs" step="0.01" min="0" value="0">
+						</div>
+						<div class="rsam-summary-row rsam-summary-total">
+							<span><?php esc_html_e( 'Total Amount', RSAM_TEXT_DOMAIN ); ?></span>
+							<input type="text" id="rsam-purchase-total-amount" value="<?php echo esc_attr( rsam_format_price( 0 ) ); ?>" readonly>
+						</div>
+
+						<div class="rsam-form-actions">
+							<button type="button" class="button button-danger" id="rsam-cancel-purchase-form"><?php esc_html_e( 'Cancel', RSAM_TEXT_DOMAIN ); ?></button>
+							<button type="submit" class="button button-primary" id="rsam-save-purchase-form">
+								<span class="rsam-btn-text"><?php esc_html_e( 'Record Purchase', RSAM_TEXT_DOMAIN ); ?></span>
+								<span class="rsam-loader-spinner"></span>
+							</button>
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+
+	</template>
+	<?php
+}
+
+/**
+ * Part 6 — Purchases (AJAX Handlers)
+ */
+
+/**
+ * (AJAX) Handler: (Purchases) ki list (fetch) karne ke liye.
+ */
+function rsam_ajax_get_purchases() {
+	// (Security) checks
+	check_ajax_referer( 'rsam-ajax-nonce', 'nonce' );
+	if ( ! current_user_can( 'rsam_manage_purchases' ) ) {
+		wp_send_json_error( [ 'message' => __( 'You do not have permission.', RSAM_TEXT_DOMAIN ) ], 403 );
+	}
+
+	global $wpdb;
+	$tables = rsam_get_table_names();
+
+	// (Pagination) parameters
+	$page = isset( $_POST['page'] ) ? absint( $_POST['page'] ) : 1;
+	$limit = 20;
+	$offset = ( $page - 1 ) * $limit;
+
+	// (Search) parameter
+	$search = isset( $_POST['search'] ) ? sanitize_text_field( wp_unslash( $_POST['search'] ) ) : '';
+
+	// (Query) conditions
+	$where_clause = '';
+	$params = [];
+	if ( ! empty( $search ) ) {
+		$search_like = '%' . $wpdb->esc_like( $search ) . '%';
+		$where_clause = ' WHERE (p.invoice_number LIKE %s OR s.name LIKE %s)';
+		$params[] = $search_like;
+		$params[] = $search_like;
+	}
+
+	// (Total items) (count) karein
+	$total_query = "SELECT COUNT(p.id) 
+                    FROM {$tables['purchases']} p 
+                    LEFT JOIN {$tables['suppliers']} s ON p.supplier_id = s.id
+                    $where_clause";
+	$total_items = $wpdb->get_var( $wpdb->prepare( $total_query, $params ) );
+
+	// (Purchases) (fetch) karein
+	$query = $wpdb->prepare(
+		"SELECT 
+			p.id, 
+			p.invoice_number, 
+			p.purchase_date, 
+			p.total_amount,
+			COALESCE(s.name, %s) as supplier_name
+		FROM 
+			{$tables['purchases']} p
+		LEFT JOIN 
+			{$tables['suppliers']} s ON p.supplier_id = s.id
+		$where_clause
+		ORDER BY 
+			p.purchase_date DESC, p.id DESC
+		LIMIT %d
+		OFFSET %d",
+		array_merge( [ __( 'N/A', RSAM_TEXT_DOMAIN ) ], $params, [ $limit, $offset ] )
+	);
+
+	$purchases = $wpdb->get_results( $query );
+    
+    // (Data) ko (format) karein
+    foreach ( $purchases as $purchase ) {
+        $purchase->total_amount_formatted = rsam_format_price( $purchase->total_amount );
+        $purchase->purchase_date_formatted = wp_date( get_option( 'date_format' ), strtotime( $purchase->purchase_date ) );
+    }
+
+	wp_send_json_success( [
+		'purchases'  => $purchases,
+		'pagination' => [
+			'total_items' => (int) $total_items,
+			'total_pages' => ceil( $total_items / $limit ),
+			'current_page' => $page,
+		],
+	] );
+}
+add_action( 'wp_ajax_rsam_get_purchases', 'rsam_ajax_get_purchases' );
+
+
+/**
+ * (AJAX) Handler: Ek (Purchase) ki mukammal (details) (fetch) karna (Edit ke liye).
+ */
+function rsam_ajax_get_purchase_details() {
+    check_ajax_referer( 'rsam-ajax-nonce', 'nonce' );
+	if ( ! current_user_can( 'rsam_manage_purchases' ) ) {
+		wp_send_json_error( [ 'message' => __( 'You do not have permission.', RSAM_TEXT_DOMAIN ) ], 403 );
+	}
+    
+    $purchase_id = isset( $_POST['purchase_id'] ) ? absint( $_POST['purchase_id'] ) : 0;
+    if ( $purchase_id <= 0 ) {
+		wp_send_json_error( [ 'message' => __( 'Invalid Purchase ID.', RSAM_TEXT_DOMAIN ) ], 400 );
+	}
+
+	// NOTE: This function is currently not used by the JS front-end due to edit restrictions.
+	// It is kept for future proofing.
+    global $wpdb;
+	$tables = rsam_get_table_names();
+
+    // (Purchase) ki (main details)
+    $purchase = $wpdb->get_row( $wpdb->prepare(
+        "SELECT * FROM {$tables['purchases']} WHERE id = %d", $purchase_id
+    ) );
+    
+    if ( ! $purchase ) {
+        wp_send_json_error( [ 'message' => __( 'Purchase not found.', RSAM_TEXT_DOMAIN ) ], 404 );
+    }
+    
+    // (Purchase Items) (details)
+    $items = $wpdb->get_results( $wpdb->prepare(
+        "SELECT 
+            pi.product_id,
+            p.name as product_name,
+            p.unit_type,
+            p.has_expiry,
+            b.quantity_received as quantity,
+            b.purchase_price,
+            b.expiry_date
+        FROM {$tables['purchase_items']} pi
+        JOIN {$tables['product_batches']} b ON pi.batch_id = b.id
+        JOIN {$tables['products']} p ON pi.product_id = p.id
+        WHERE pi.purchase_id = %d",
+        $purchase_id
+    ) );
+    
+    // (Supplier) (details) (agar hai)
+    $supplier = null;
+    if ( $purchase->supplier_id > 0 ) {
+        $supplier = $wpdb->get_row( $wpdb->prepare(
+            "SELECT id, name FROM {$tables['suppliers']} WHERE id = %d", $purchase->supplier_id
+        ) );
+    }
+
+    wp_send_json_success( [
+        'purchase' => $purchase,
+        'items'    => $items,
+        'supplier' => $supplier,
+    ] );
+}
+add_action( 'wp_ajax_rsam_get_purchase_details', 'rsam_ajax_get_purchase_details' );
+
+
+/**
+ * (AJAX) Handler: Nayi (Purchase) (save) ya (update) karna.
+ * Yeh ek (complex) (handler) hai jo (stock) aur (costing) ko (handle) karega.
+ */
+function rsam_ajax_save_purchase() {
+    check_ajax_referer( 'rsam-ajax-nonce', 'nonce' );
+	if ( ! current_user_can( 'rsam_manage_purchases' ) ) {
+		wp_send_json_error( [ 'message' => __( 'You do not have permission.', RSAM_TEXT_DOMAIN ) ], 403 );
+	}
+
+    // (POST data) (parse) karein
+	$data = wp_unslash( $_POST );
+    
+    // (Main) (Purchase) (data) (sanitize) karein
+    $purchase_id    = isset( $data['purchase_id'] ) ? absint( $data['purchase_id'] ) : 0;
+    $supplier_id    = isset( $data['supplier_id'] ) ? absint( $data['supplier_id'] ) : 0;
+    $invoice_number = isset( $data['invoice_number'] ) ? sanitize_text_field( $data['invoice_number'] ) : '';
+    $purchase_date  = isset( $data['purchase_date'] ) ? sanitize_text_field( $data['purchase_date'] ) : '';
+    $subtotal       = isset( $data['subtotal'] ) ? floatval( $data['subtotal'] ) : 0;
+    $additional_costs = isset( $data['additional_costs'] ) ? floatval( $data['additional_costs'] ) : 0;
+    $total_amount   = isset( $data['total_amount'] ) ? floatval( $data['total_amount'] ) : 0;
+    $notes          = isset( $data['notes'] ) ? sanitize_textarea_field( $data['notes'] ) : '';
+    
+    // (Items) (JSON string) se (array) mein (convert) karein
+    $items = isset( $data['items'] ) ? json_decode( $data['items'], true ) : [];
+
+    // (Validation)
+    if ( empty( $purchase_date ) || empty( $items ) || $subtotal < 0 || $additional_costs < 0 ) {
+        wp_send_json_error( [ 'message' => __( 'Please fill all required fields correctly (Date and Items).', RSAM_TEXT_DOMAIN ) ], 400 );
+    }
+
+    // (Purchase editing) ko (block) karein
+    if ( $purchase_id > 0 ) {
+        wp_send_json_error( [ 'message' => __( 'Editing existing purchases is not supported in this version.', RSAM_TEXT_DOMAIN ) ], 400 );
+    }
+
+    global $wpdb;
+	$tables = rsam_get_table_names();
+    
+    // (Database Transaction) shuru karein
+    $wpdb->query( 'START TRANSACTION' );
+
+    try {
+        // 1. (Purchase) (record) (Insert) karein
+        $purchase_result = $wpdb->insert(
+            $tables['purchases'],
+            [
+                'supplier_id'      => $supplier_id,
+                'invoice_number'   => $invoice_number,
+                'purchase_date'    => $purchase_date,
+                'subtotal'         => $subtotal,
+                'additional_costs' => $additional_costs,
+                'total_amount'     => $total_amount,
+                'notes'            => $notes,
+            ],
+            [ '%d', '%s', '%s', '%f', '%f', '%f', '%s' ]
+        );
+
+        if ( ! $purchase_result ) {
+            throw new Exception( __( 'Failed to save main purchase record.', RSAM_TEXT_DOMAIN ) );
+        }
+        
+        $new_purchase_id = $wpdb->insert_id;
+
+        // (Additional Costs) ko (distribute) karne ke liye (factor)
+        $cost_distribution_factor = ( $subtotal > 0 ) ? ( $additional_costs / $subtotal ) : 0;
+
+        // 2. (Items) ko (loop) karein, (Batches) banayein, aur (Stock) (update) karein
+        foreach ( $items as $item ) {
+            $product_id     = absint( $item['product_id'] );
+            $quantity       = floatval( $item['quantity'] );
+            $purchase_price = floatval( $item['purchase_price'] );
+            $expiry_date    = ! empty( $item['expiry_date'] ) ? sanitize_text_field( $item['expiry_date'] ) : null;
+            
+            if ( $quantity <= 0 || $purchase_price < 0 ) {
+                continue; // (Invalid item) ko (skip) karein
+            }
+
+            // (Cost Price) (Calculate) karein (Proportional distribution)
+            $distributed_cost = $purchase_price * $cost_distribution_factor;
+            $cost_price = $purchase_price + $distributed_cost;
+            
+            // 2a. Naya (Product Batch) banayein
+            $batch_result = $wpdb->insert(
+                $tables['product_batches'],
+                [
+                    'product_id'        => $product_id,
+                    'purchase_id'       => $new_purchase_id,
+                    'quantity_received' => $quantity,
+                    'quantity_in_stock' => $quantity, // Shuru mein (stock) (full) hoga
+                    'purchase_price'    => $purchase_price,
+                    'cost_price'        => $cost_price,
+                    'expiry_date'       => $expiry_date,
+                    'received_at'       => $purchase_date . ' ' . wp_date('H:i:s'),
+                ],
+                [ '%d', '%d', '%f', '%f', '%f', '%f', '%s', '%s' ]
+            );
+            
+            if ( ! $batch_result ) {
+                throw new Exception( __( 'Failed to create product batch.', RSAM_TEXT_DOMAIN ) );
+            }
+
+            $new_batch_id = $wpdb->insert_id;
+            
+            // 2b. (Purchase Item) (record) (link) karein
+            $item_result = $wpdb->insert(
+                $tables['purchase_items'],
+                [
+                    'purchase_id'   => $new_purchase_id,
+                    'product_id'    => $product_id,
+                    'batch_id'      => $new_batch_id,
+                    'quantity'      => $quantity,
+                    'purchase_price' => $purchase_price,
+                    'item_subtotal' => $quantity * $purchase_price,
+                ],
+                [ '%d', '%d', '%d', '%f', '%f', '%f' ]
+            );
+
+            if ( ! $item_result ) {
+                throw new Exception( __( 'Failed to save purchase item link.', RSAM_TEXT_DOMAIN ) );
+            }
+
+            // 2c. (Main Product) table mein (Stock Quantity) (update) karein
+            $stock_update_result = $wpdb->query( $wpdb->prepare(
+                "UPDATE {$tables['products']} SET stock_quantity = stock_quantity + %f WHERE id = %d",
+                $quantity,
+                $product_id
+            ) );
+
+            if ( $stock_update_result === false ) {
+                 throw new Exception( __( 'Failed to update main product stock.', RSAM_TEXT_DOMAIN ) );
+            }
+        }
+        
+        // (Transaction) (Commit) karein
+        $wpdb->query( 'COMMIT' );
+        wp_send_json_success( [ 'message' => __( 'Purchase recorded successfully. Stock updated.', RSAM_TEXT_DOMAIN ) ] );
+
+    } catch ( Exception $e ) {
+        // (Transaction) (Rollback) karein agar koi (error) aaye
+        $wpdb->query( 'ROLLBACK' );
+        wp_send_json_error( [ 'message' => $e->getMessage() ], 500 );
+    }
+}
+add_action( 'wp_ajax_rsam_save_purchase', 'rsam_ajax_save_purchase' );
+
+
+/**
+ * (AJAX) Handler: (Purchase) (delete) karna.
+ */
+function rsam_ajax_delete_purchase() {
+    check_ajax_referer( 'rsam-ajax-nonce', 'nonce' );
+	if ( ! current_user_can( 'rsam_manage_purchases' ) ) {
+		wp_send_json_error( [ 'message' => __( 'You do not have permission.', RSAM_TEXT_DOMAIN ) ], 403 );
+	}
+    
+    $purchase_id = isset( $_POST['purchase_id'] ) ? absint( $_POST['purchase_id'] ) : 0;
+    if ( $purchase_id <= 0 ) {
+		wp_send_json_error( [ 'message' => __( 'Invalid Purchase ID.', RSAM_TEXT_DOMAIN ) ], 400 );
+	}
+    
+    global $wpdb;
+	$tables = rsam_get_table_names();
+
+    // (Transaction) shuru karein
+    $wpdb->query( 'START TRANSACTION' );
+    
+    try {
+        // 1. Is (purchase) se (link) tamam (batches) (find) karein
+        $batches = $wpdb->get_results( $wpdb->prepare(
+            "SELECT id, product_id, quantity_received, quantity_in_stock 
+             FROM {$tables['product_batches']} 
+             WHERE purchase_id = %d FOR UPDATE", // Row lock for consistency
+            $purchase_id
+        ) );
+
+        if ( ! $batches ) {
+             throw new Exception( __( 'No associated product batches found for this purchase.', RSAM_TEXT_DOMAIN ) );
+        }
+        
+        foreach ( $batches as $batch ) {
+            // 2. Check karein ke (stock) (sell) to nahi hua
+            if ( (float) $batch->quantity_received !== (float) $batch->quantity_in_stock ) {
+                throw new Exception( sprintf( __( 'Cannot delete. Stock from this purchase (Batch #%d) has already been sold.', RSAM_TEXT_DOMAIN ), $batch->id ) );
+            }
+
+            // 3. (Main Product) se (stock) (reverse) karein
+            $stock_update_result = $wpdb->query( $wpdb->prepare(
+                "UPDATE {$tables['products']} SET stock_quantity = stock_quantity - %f WHERE id = %d",
+                $batch->quantity_in_stock,
+                $batch->product_id
+            ) );
+            
+            if ( $stock_update_result === false ) {
+                throw new Exception( __( 'Failed to reverse product stock.', RSAM_TEXT_DOMAIN ) );
+            }
+
+            // 4. (Batch) (delete) karein
+            $wpdb->delete( $tables['product_batches'], [ 'id' => $batch->id ], [ '%d' ] );
+        }
+        
+        // 5. (Purchase Items) (delete) karein
+        $wpdb->delete( $tables['purchase_items'], [ 'purchase_id' => $purchase_id ], [ '%d' ] );
+        
+        // 6. (Main Purchase) (record) (delete) karein
+        $wpdb->delete( $tables['purchases'], [ 'id' => $purchase_id ], [ '%d' ] );
+
+        // (Transaction) (Commit) karein
+        $wpdb->query( 'COMMIT' );
+        wp_send_json_success( [ 'message' => __( 'Purchase deleted and stock reversed successfully.', RSAM_TEXT_DOMAIN ) ] );
+
+    } catch ( Exception $e ) {
+        // (Transaction) (Rollback) karein
+        $wpdb->query( 'ROLLBACK' );
+        wp_send_json_error( [ 'message' => $e->getMessage() ], 500 );
+    }
+}
+add_action( 'wp_ajax_rsam_delete_purchase', 'rsam_ajax_delete_purchase' );
+
+
+/**
+ * Part 7 — Sales (Templates)
+ */
+
+/**
+ * Sales Screen ke liye (HTML <template>)
+ */
+function rsam_template_sales() {
+	?>
+	<template id="rsam-tmpl-sales">
+		
+		<div id="rsam-sales-list-view">
+			<div class="rsam-screen-header">
+				<h1><?php esc_html_e( 'Sales Ledger', RSAM_TEXT_DOMAIN ); ?></h1>
+				<button type="button" class="button button-primary" id="rsam-add-new-sale">
+					<span class="dashicons dashicons-cart"></span>
+					<?php esc_html_e( 'New Sale (POS)', RSAM_TEXT_DOMAIN ); ?>
+				</button>
+			</div>
+
+			<div class="rsam-list-controls">
+				<input type="search" id="rsam-sales-search" class="rsam-search-field" placeholder="<?php esc_attr_e( 'Search by Sale ID or Customer...', RSAM_TEXT_DOMAIN ); ?>">
+			</div>
+
+			<div class="rsam-list-table-wrapper">
+				<table class="rsam-list-table" id="rsam-sales-table">
+					<thead>
+						<tr>
+							<th><?php esc_html_e( 'Sale ID', RSAM_TEXT_DOMAIN ); ?></th>
+							<th><?php esc_html_e( 'Customer', RSAM_TEXT_DOMAIN ); ?></th>
+							<th><?php esc_html_e( 'Sale Date', RSAM_TEXT_DOMAIN ); ?></th>
+							<th><?php esc_html_e( 'Total Amount', RSAM_TEXT_DOMAIN ); ?></th>
+                            <th><?php esc_html_e( 'Total Profit', RSAM_TEXT_DOMAIN ); ?></th>
+                            <th><?php esc_html_e( 'Payment Status', RSAM_TEXT_DOMAIN ); ?></th>
+							<th><?php esc_html_e( 'Actions', RSAM_TEXT_DOMAIN ); ?></th>
+						</tr>
+					</thead>
+					<tbody id="rsam-sales-table-body">
+						<tr>
+							<td colspan="7" class="rsam-list-loading">
+								<span class="rsam-loader-spinner"></span> <?php esc_html_e( 'Loading sales...', RSAM_TEXT_DOMAIN ); ?>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<div class="rsam-pagination" id="rsam-sales-pagination">
+				</div>
+		</div>
+
+		<div id="rsam-sales-form-view" style="display: none;">
+			
+            <div class="rsam-screen-header">
+				<h1 id="rsam-sale-form-title"><?php esc_html_e( 'New Sale (Point of Sale)', RSAM_TEXT_DOMAIN ); ?></h1>
+				<button type="button" class="button" id="rsam-back-to-sales-list">
+					<span class="dashicons dashicons-arrow-left-alt"></span>
+					<?php esc_html_e( 'Back to Sales Ledger', RSAM_TEXT_DOMAIN ); ?>
+				</button>
+			</div>
+
+            <div class="rsam-pos-layout">
+
+                <div class="rsam-pos-cart">
+                    <form id="rsam-sale-form" class="rsam-form">
+                        <input type="hidden" name="sale_id" value="0">
+                        
+                        <div class="rsam-card">
+                            <div class="rsam-form-field">
+                                <label for="rsam-sale-customer"><?php esc_html_e( 'Customer', RSAM_TEXT_DOMAIN ); ?></label>
+                                <select id="rsam-sale-customer" name="customer_id" class="rsam-customer-search-select">
+                                    <option value="0"><?php esc_html_e( 'Walk-in Customer', RSAM_TEXT_DOMAIN ); ?></option>
+                                    </select>
+                                <button type="button" class="button button-small rsam-quick-add" data-type="customer" title="<?php esc_attr_e( 'Add New Customer', RSAM_TEXT_DOMAIN ); ?>"><span class="dashicons dashicons-plus-alt"></span></button>
+                            </div>
+                        </div>
+
+                        <div class="rsam-card">
+                            <div class="rsam-form-field">
+                                <label for="rsam-sale-product-search"><?php esc_html_e( 'Scan or Search Product', RSAM_TEXT_DOMAIN ); ?></label>
+                                <input type="text" id="rsam-sale-product-search" placeholder="<?php esc_attr_e( 'Type product name or scan barcode...', RSAM_TEXT_DOMAIN ); ?>">
+                            </div>
+                        </div>
+
+                        <div class="rsam-card rsam-cart-items-wrapper">
+                            <div class="rsam-list-table-wrapper">
+                                <table class="rsam-list-table" id="rsam-sale-items-table">
+                                    <thead>
+                                        <tr>
+                                            <th><?php esc_html_e( 'Product', RSAM_TEXT_DOMAIN ); ?></th>
+                                            <th><?php esc_html_e( 'Qty', RSAM_TEXT_DOMAIN ); ?></th>
+                                            <th><?php esc_html_e( 'Price', RSAM_TEXT_DOMAIN ); ?></th>
+                                            <th><?php esc_html_e( 'Total', RSAM_TEXT_DOMAIN ); ?></th>
+                                            <th><?php esc_html_e( 'Action', RSAM_TEXT_DOMAIN ); ?></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="rsam-sale-items-body">
+                                        <tr class="rsam-no-items-row">
+                                            <td colspan="5"><?php esc_html_e( 'Cart is empty.', RSAM_TEXT_DOMAIN ); ?></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+
+                <div class="rsam-pos-summary">
+                    <div class="rsam-card">
+                        <h3><?php esc_html_e( 'Transaction Summary', RSAM_TEXT_DOMAIN ); ?></h3>
+                        
+                        <div class="rsam-summary-row">
+                            <span><?php esc_html_e( 'Subtotal', RSAM_TEXT_DOMAIN ); ?></span>
+                            <span id="rsam-sale-subtotal"><?php echo esc_html( rsam_format_price( 0 ) ); ?></span>
+                        </div>
+
+                        <div class="rsam-summary-row rsam-form-field-inline">
+                            <label for="rsam-sale-discount"><?php esc_html_e( 'Discount', RSAM_TEXT_DOMAIN ); ?></label>
+                            <input type="number" id="rsam-sale-discount" name="discount_amount" step="0.01" min="0" value="0">
+                        </div>
+                        
+                        <div class="rsam-summary-row rsam-summary-total">
+                            <span><?php esc_html_e( 'Total Amount', RSAM_TEXT_DOMAIN ); ?></span>
+                            <span id="rsam-sale-total-amount"><?php echo esc_html( rsam_format_price( 0 ) ); ?></span>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="rsam-form-field">
+                            <label for="rsam-sale-payment-status"><?php esc_html_e( 'Payment Status', RSAM_TEXT_DOMAIN ); ?> <span class="rsam-required">*</span></label>
+                            <select id="rsam-sale-payment-status" name="payment_status" required>
+                                <option value="paid"><?php esc_html_e( 'Paid', RSAM_TEXT_DOMAIN ); ?></option>
+                                <option value="unpaid"><?php esc_html_e( 'Unpaid (Add to Khata)', RSAM_TEXT_DOMAIN ); ?></option>
+                                </select>
+                        </div>
+                        
+                        <div class="rsam-form-field rsam-sale-notes">
+                            <label for="rsam-sale-notes"><?php esc_html_e( 'Sale Notes', RSAM_TEXT_DOMAIN ); ?></label>
+                            <textarea id="rsam-sale-notes" name="notes" rows="3"></textarea>
+                        </div>
+
+                        <div class="rsam-form-actions rsam-pos-actions">
+                            <button type="button" class="button button-danger" id="rsam-cancel-sale-form"><?php esc_html_e( 'Cancel', RSAM_TEXT_DOMAIN ); ?></button>
+                            <button type="button" class="button button-primary button-hero" id="rsam-save-sale-form">
+                                <span class="rsam-btn-text"><?php esc_html_e( 'Complete Sale', RSAM_TEXT_DOMAIN ); ?></span>
+                                <span class="rsam-loader-spinner"></span>
+                            </button>
+                        </div>
+
+                        <div id="rsam-sale-stock-alert" class="rsam-alert rsam-alert-danger" style="display: none;">
+                            </div>
+
+                    </div>
+                </div>
+
+            </div>
+		</div>
+
+	</template>
+	<?php
+}
+
+/**
+ * Part 8 — Sales (AJAX Handlers)
+ */
+
+/**
+ * (AJAX) Handler: (Sales) ki list (fetch) karne ke liye.
+ */
+function rsam_ajax_get_sales() {
+	// (Security) checks
+	check_ajax_referer( 'rsam-ajax-nonce', 'nonce' );
+	if ( ! current_user_can( 'rsam_manage_sales' ) ) {
+		wp_send_json_error( [ 'message' => __( 'You do not have permission.', RSAM_TEXT_DOMAIN ) ], 403 );
+	}
+
+	global $wpdb;
+	$tables = rsam_get_table_names();
+
+	// (Pagination) parameters
+	$page = isset( $_POST['page'] ) ? absint( $_POST['page'] ) : 1;
+	$limit = 20;
+	$offset = ( $page - 1 ) * $limit;
+
+	// (Search) parameter
+	$search = isset( $_POST['search'] ) ? sanitize_text_field( wp_unslash( $_POST['search'] ) ) : '';
+
+	// (Query) conditions
+	$where_clause = '';
+	$params = [];
+	if ( ! empty( $search ) ) {
+        // (Sale ID) ya (Customer Name) se (search)
+		$search_like = '%' . $wpdb->esc_like( $search ) . '%';
+        $search_id = absint( $search );
+		$where_clause = ' WHERE (s.id = %d OR c.name LIKE %s)';
+		$params[] = $search_id;
+        $params[] = $search_like;
+	}
+
+	// (Total items) (count) karein
+	$total_query = "SELECT COUNT(s.id) 
+                    FROM {$tables['sales']} s
+                    LEFT JOIN {$tables['customers']} c ON s.customer_id = c.id
+                    $where_clause";
+	$total_items = $wpdb->get_var( $wpdb->prepare( $total_query, $params ) );
+
+	// (Sales) (fetch) karein
+	$query = $wpdb->prepare(
+		"SELECT 
+			s.id, 
+			s.sale_date, 
+			s.total_amount,
+            s.total_profit,
+            s.payment_status,
+			COALESCE(c.name, %s) as customer_name
+		FROM 
+			{$tables['sales']} s
+		LEFT JOIN 
+			{$tables['customers']} c ON s.customer_id = c.id
+		$where_clause
+		ORDER BY 
+			s.sale_date DESC, s.id DESC
+		LIMIT %d
+		OFFSET %d",
+		array_merge( [ __( 'Walk-in Customer', RSAM_TEXT_DOMAIN ) ], $params, [ $limit, $offset ] )
+	);
+
+	$sales = $wpdb->get_results( $query );
+    
+    // (Data) ko (format) karein
+    foreach ( $sales as $sale ) {
+        $sale->total_amount_formatted = rsam_format_price( $sale->total_amount );
+        $sale->total_profit_formatted = rsam_format_price( $sale->total_profit );
+        // NOTE: wp_date requires a timestamp in its second argument, not a MySQL date string.
+        $sale->sale_date_formatted = wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $sale->sale_date ) );
+        $sale->payment_status_label = ucfirst( $sale->payment_status );
+    }
+
+	wp_send_json_success( [
+		'sales'      => $sales,
+		'pagination' => [
+			'total_items' => (int) $total_items,
+			'total_pages' => ceil( $total_items / $limit ),
+			'current_page' => $page,
+		],
+	] );
+}
+add_action( 'wp_ajax_rsam_get_sales', 'rsam_ajax_get_sales' );
+
+
+/**
+ * (AJAX) Handler: Ek (Sale) ki mukammal (details) (fetch) karna (Receipt ke liye).
+ */
+function rsam_ajax_get_sale_details() {
+    check_ajax_referer( 'rsam-ajax-nonce', 'nonce' );
+	if ( ! current_user_can( 'rsam_manage_sales' ) ) {
+		wp_send_json_error( [ 'message' => __( 'You do not have permission.', RSAM_TEXT_DOMAIN ) ], 403 );
+	}
+    
+    $sale_id = isset( $_POST['sale_id'] ) ? absint( $_POST['sale_id'] ) : 0;
+    if ( $sale_id <= 0 ) {
+		wp_send_json_error( [ 'message' => __( 'Invalid Sale ID.', RSAM_TEXT_DOMAIN ) ], 400 );
+	}
+
+    global $wpdb;
+	$tables = rsam_get_table_names();
+
+    // (Sale) ki (main details)
+    $sale = $wpdb->get_row( $wpdb->prepare(
+        "SELECT s.*, COALESCE(c.name, %s) as customer_name 
+         FROM {$tables['sales']} s
+         LEFT JOIN {$tables['customers']} c ON s.customer_id = c.id
+         WHERE s.id = %d",
+         __( 'Walk-in Customer', RSAM_TEXT_DOMAIN ), $sale_id
+    ) );
+    
+    if ( ! $sale ) {
+        wp_send_json_error( [ 'message' => __( 'Sale not found.', RSAM_TEXT_DOMAIN ) ], 404 );
+    }
+    
+    // (Sale Items) (details)
+    $items = $wpdb->get_results( $wpdb->prepare(
+        "SELECT 
+            si.*,
+            p.name as product_name,
+            p.unit_type
+        FROM {$tables['sale_items']} si
+        JOIN {$tables['products']} p ON si.product_id = p.id
+        WHERE si.sale_id = %d",
+        $sale_id
+    ) );
+    
+    // (Data) (format) karein
+    $sale->total_amount_formatted = rsam_format_price( $sale->total_amount );
+    $sale->subtotal_formatted = rsam_format_price( $sale->subtotal );
+    $sale->discount_amount_formatted = rsam_format_price( $sale->discount_amount );
+    $sale->total_cost_formatted = rsam_format_price( $sale->total_cost );
+    $sale->total_profit_formatted = rsam_format_price( $sale->total_profit );
+    $sale->sale_date_formatted = wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $sale->sale_date ) );
+    
+    foreach ( $items as $item ) {
+        $item->selling_price_formatted = rsam_format_price( $item->selling_price );
+        $item->item_total = $item->quantity * $item->selling_price;
+        $item->item_total_formatted = rsam_format_price( $item->item_total );
+    }
+
+    wp_send_json_success( [
+        'sale'  => $sale,
+        'items' => $items,
+    ] );
+}
+add_action( 'wp_ajax_rsam_get_sale_details', 'rsam_ajax_get_sale_details' );
+
+
+/**
+ * (AJAX) Handler: Nayi (Sale) (save) karna.
+ */
+function rsam_ajax_save_sale() {
+    check_ajax_referer( 'rsam-ajax-nonce', 'nonce' );
+	if ( ! current_user_can( 'rsam_manage_sales' ) ) {
+		wp_send_json_error( [ 'message' => __( 'You do not have permission.', RSAM_TEXT_DOMAIN ) ], 403 );
+	}
+
+    global $wpdb;
+	$tables = rsam_get_table_names();
+
+    // (POST data) (parse) karein
+	$data = wp_unslash( $_POST );
+    
+    // (Main) (Sale) (data) (sanitize) karein
+    $sale_id         = isset( $data['sale_id'] ) ? absint( $data['sale_id'] ) : 0;
+    $customer_id     = isset( $data['customer_id'] ) ? absint( $data['customer_id'] ) : 0;
+    $discount_amount = isset( $data['discount_amount'] ) ? floatval( $data['discount_amount'] ) : 0;
+    $payment_status  = isset( $data['payment_status'] ) ? sanitize_key( $data['payment_status'] ) : 'paid';
+    $notes           = isset( $data['notes'] ) ? sanitize_textarea_field( $data['notes'] ) : '';
+    
+    // (Items) (JSON string) se (array) mein (convert) karein
+    $items = isset( $data['items'] ) ? json_decode( $data['items'], true ) : [];
+    
+    // (Validation)
+    if ( $sale_id > 0 ) {
+         wp_send_json_error( [ 'message' => __( 'Editing existing sales is not supported. Please delete and create a new one.', RSAM_TEXT_DOMAIN ) ], 400 );
+    }
+    if ( empty( $items ) ) {
+        wp_send_json_error( [ 'message' => __( 'Cart is empty. Please add products to sell.', RSAM_TEXT_DOMAIN ) ], 400 );
+    }
+    if ( $payment_status === 'unpaid' && $customer_id === 0 ) {
+        wp_send_json_error( [ 'message' => __( 'Please select a customer to save an unpaid (Khata) sale.', RSAM_TEXT_DOMAIN ) ], 400 );
+    }
+
+    // (Sale) (Totals) (calculate) karne ke liye (variables)
+    $grand_subtotal = 0;
+    $grand_total_cost = 0;
+
+    // (Database Transaction) shuru karein
+    $wpdb->query( 'START TRANSACTION' );
+
+    try {
+        // (Sale) (record) (temporarily) banayein
+        $sale_time = current_time( 'mysql' );
+        $wpdb->insert(
+            $tables['sales'],
+            [
+                'customer_id'   => $customer_id,
+                'sale_date'     => $sale_time,
+                'subtotal'      => 0, // (Temp)
+                'total_amount'  => 0, // (Temp)
+                'total_cost'    => 0, // (Temp)
+                'total_profit'  => 0, // (Temp)
+                'discount_amount' => $discount_amount, // Save early
+                'payment_status'=> $payment_status,
+                'notes'         => $notes,
+            ],
+            [ '%d', '%s', '%f', '%f', '%f', '%f', '%f', '%s', '%s' ]
+        );
+        $new_sale_id = $wpdb->insert_id;
+        if ( ! $new_sale_id ) {
+            throw new Exception( __( 'Failed to create initial sale record.', RSAM_TEXT_DOMAIN ) );
+        }
+
+        // Ab (items) ko (process) karein (FIFO Logic)
+        foreach ( $items as $item ) {
+            $product_id     = absint( $item['product_id'] );
+            $quantity_to_sell = floatval( $item['quantity'] );
+            $selling_price  = floatval( $item['selling_price'] );
+            
+            if ( $quantity_to_sell <= 0 ) continue;
+            
+            $grand_subtotal += $quantity_to_sell * $selling_price;
+            $item_total_cost = 0;
+            
+            // 1. (Stock) (check) karein
+            $available_stock = $wpdb->get_var( $wpdb->prepare(
+                "SELECT stock_quantity FROM {$tables['products']} WHERE id = %d FOR UPDATE", // (Lock row)
+                $product_id
+            ) );
+            
+            if ( $available_stock < $quantity_to_sell ) {
+                $product_name = $wpdb->get_var( $wpdb->prepare( "SELECT name FROM {$tables['products']} WHERE id = %d", $product_id ) );
+                throw new Exception( sprintf( __( 'Insufficient stock for %s. Available: %s, Required: %s', RSAM_TEXT_DOMAIN ), $product_name, $available_stock, $quantity_to_sell ) );
+            }
+
+            // 2. (FIFO) ke liye (batches) (fetch) karein
+            $batches = $wpdb->get_results( $wpdb->prepare(
+                "SELECT id, cost_price, quantity_in_stock 
+                 FROM {$tables['product_batches']} 
+                 WHERE product_id = %d AND quantity_in_stock > 0 
+                 ORDER BY received_at ASC, id ASC FOR UPDATE", // (Lock rows)
+                $product_id
+            ) );
+            
+            $temp_qty_needed = $quantity_to_sell;
+
+            foreach ( $batches as $batch ) {
+                if ( $temp_qty_needed <= 0 ) break;
+
+                $sell_from_this_batch = min( $temp_qty_needed, (float) $batch->quantity_in_stock );
+                $batch_cost_price = (float) $batch->cost_price;
+                
+                $item_total_cost += $sell_from_this_batch * $batch_cost_price;
+                
+                // 3a. (Sale Item) (record) (insert) karein
+                $wpdb->insert(
+                    $tables['sale_items'],
+                    [
+                        'sale_id'       => $new_sale_id,
+                        'product_id'    => $product_id,
+                        'batch_id'      => $batch->id,
+                        'quantity'      => $sell_from_this_batch,
+                        'selling_price' => $selling_price,
+                        'cost_price'    => $batch_cost_price,
+                        'item_profit'   => ( $selling_price - $batch_cost_price ) * $sell_from_this_batch,
+                    ],
+                    [ '%d', '%d', '%d', '%f', '%f', '%f', '%f' ]
+                );
+                
+                // 3b. (Batch) (stock) (update) karein
+                $wpdb->query( $wpdb->prepare(
+                    "UPDATE {$tables['product_batches']} SET quantity_in_stock = quantity_in_stock - %f WHERE id = %d",
+                    $sell_from_this_batch,
+                    $batch->id
+                ) );
+                
+                $temp_qty_needed -= $sell_from_this_batch;
+            }
+
+            // 3c. (Main Product) (stock) (update) karein
+            $wpdb->query( $wpdb->prepare(
+                "UPDATE {$tables['products']} SET stock_quantity = stock_quantity - %f WHERE id = %d",
+                $quantity_to_sell,
+                $product_id
+            ) );
+
+            $grand_total_cost += $item_total_cost;
+        }
+
+        // 4. (Main Sale) (record) ko (Final Totals) ke sath (update) karein
+        $total_amount = $grand_subtotal - $discount_amount;
+        $total_profit = ( $grand_subtotal - $grand_total_cost ) - $discount_amount;
+
+        $wpdb->update(
+            $tables['sales'],
+            [
+                'subtotal'        => $grand_subtotal,
+                'total_amount'    => $total_amount,
+                'total_cost'      => $grand_total_cost,
+                'total_profit'    => $total_profit,
+            ],
+            [ 'id' => $new_sale_id ],
+            [ '%f', '%f', '%f', '%f' ],
+            [ '%d' ]
+        );
+        
+        // 5. (Customer Khata) (update) karein (agar (unpaid) hai)
+        if ( $payment_status === 'unpaid' && $customer_id > 0 ) {
+            $wpdb->query( $wpdb->prepare(
+                "UPDATE {$tables['customers']} SET credit_balance = credit_balance + %f WHERE id = %d",
+                $total_amount,
+                $customer_id
+            ) );
+        }
+        
+        // (Transaction) (Commit) karein
+        $wpdb->query( 'COMMIT' );
+        wp_send_json_success( [ 
+            'message' => __( 'Sale recorded successfully.', RSAM_TEXT_DOMAIN ),
+            'sale_id' => $new_sale_id,
+        ] );
+
+    } catch ( Exception $e ) {
+        // (Transaction) (Rollback) karein agar koi (error) aaye
+        $wpdb->query( 'ROLLBACK' );
+        wp_send_json_error( [ 'message' => $e->getMessage() ], 500 );
+    }
+}
+add_action( 'wp_ajax_rsam_save_sale', 'rsam_ajax_save_sale' );
+
+
+/**
+ * (AJAX) Handler: (Sale) (delete) karna (Stock reversal).
+ */
+function rsam_ajax_delete_sale() {
+    check_ajax_referer( 'rsam-ajax-nonce', 'nonce' );
+	if ( ! current_user_can( 'rsam_manage_sales' ) ) {
+		wp_send_json_error( [ 'message' => __( 'You do not have permission.', RSAM_TEXT_DOMAIN ) ], 403 );
+	}
+    
+    $sale_id = isset( $_POST['sale_id'] ) ? absint( $_POST['sale_id'] ) : 0;
+    if ( $sale_id <= 0 ) {
+		wp_send_json_error( [ 'message' => __( 'Invalid Sale ID.', RSAM_TEXT_DOMAIN ) ], 400 );
+	}
+    
+    global $wpdb;
+	$tables = rsam_get_table_names();
+
+    // (Transaction) shuru karein
+    $wpdb->query( 'START TRANSACTION' );
+
+    try {
+        // 1. (Sale) (details) (fetch) karein
+        $sale = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$tables['sales']} WHERE id = %d FOR UPDATE", $sale_id ) );
+        if ( ! $sale ) {
+            throw new Exception( __( 'Sale not found.', RSAM_TEXT_DOMAIN ) );
+        }
+        
+        // 2. (Sale Items) (fetch) karein
+        $sale_items = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$tables['sale_items']} WHERE sale_id = %d", $sale_id ) );
+        if ( ! $sale_items ) {
+             throw new Exception( __( 'Sale items not found.', RSAM_TEXT_DOMAIN ) );
+        }
+
+        // 3. (Stock) (reverse) karein (loop) (items)
+        foreach ( $sale_items as $item ) {
+            // 3a. (Batch) mein (stock) wapis (add) karein
+            $wpdb->query( $wpdb->prepare(
+                "UPDATE {$tables['product_batches']} SET quantity_in_stock = quantity_in_stock + %f WHERE id = %d",
+                $item->quantity,
+                $item->batch_id
+            ) );
+            
+            // 3b. (Main Product) mein (stock) wapis (add) karein
+            $wpdb->query( $wpdb->prepare(
+                "UPDATE {$tables['products']} SET stock_quantity = stock_quantity + %f WHERE id = %d",
+                $item->quantity,
+                $item->product_id
+            ) );
+        }
+        
+        // 4. (Customer Khata) (reverse) karein (agar (unpaid) tha)
+        if ( $sale->payment_status === 'unpaid' && $sale->customer_id > 0 ) {
+             $wpdb->query( $wpdb->prepare(
+                "UPDATE {$tables['customers']} SET credit_balance = credit_balance - %f WHERE id = %d",
+                $sale->total_amount,
+                $sale->customer_id
+            ) );
+        }
+        
+        // 5. (Sale Items) (delete) karein
+        $wpdb->delete( $tables['sale_items'], [ 'sale_id' => $sale_id ], [ '%d' ] );
+
+        // 6. (Main Sale) (record) (delete) karein
+        $wpdb->delete( $tables['sales'], [ 'id' => $sale_id ], [ '%d' ] );
+        
+        // (Transaction) (Commit) karein
+        $wpdb->query( 'COMMIT' );
+        wp_send_json_success( [ 'message' => __( 'Sale deleted. Stock and customer khata reversed successfully.', RSAM_TEXT_DOMAIN ) ] );
+
+    } catch ( Exception $e ) {
+        // (Transaction) (Rollback) karein
+        $wpdb->query( 'ROLLBACK' );
+        wp_send_json_error( [ 'message' => $e->getMessage() ], 500 );
+    }
+}
+add_action( 'wp_ajax_rsam_delete_sale', 'rsam_ajax_delete_sale' );
+
+
+/**
+ * Part 9 — Expenses (Templates + AJAX)
+ */
+
+/**
+ * Expenses Screen ke liye (HTML <template>)
+ */
+function rsam_template_expenses() {
+	?>
+	<template id="rsam-tmpl-expenses">
+		<div class="rsam-screen-header">
+			<h1><?php esc_html_e( 'Expenses', RSAM_TEXT_DOMAIN ); ?></h1>
+			<button type="button" class="button button-primary" id="rsam-add-new-expense">
+				<span class="dashicons dashicons-plus-alt"></span>
+				<?php esc_html_e( 'Add New Expense', RSAM_TEXT_DOMAIN ); ?>
+			</button>
+		</div>
+
+		<div class="rsam-list-controls">
+			<input type="search" id="rsam-expense-search" class="rsam-search-field" placeholder="<?php esc_attr_e( 'Search by description...', RSAM_TEXT_DOMAIN ); ?>">
+			
+            <select id="rsam-expense-category-filter" name="category_filter" class="rsam-filter-field">
+                <option value=""><?php esc_html_e( 'All Categories', RSAM_TEXT_DOMAIN ); ?></option>
+                <option value="rent"><?php esc_html_e( 'Shop Rent', RSAM_TEXT_DOMAIN ); ?></option>
+                <option value="salary"><?php esc_html_e( 'Employee Salary', RSAM_TEXT_DOMAIN ); ?></option>
+                <option value="utility"><?php esc_html_e( 'Utilities (Electricity, Water)', RSAM_TEXT_DOMAIN ); ?></option>
+                <option value="maintenance"><?php esc_html_e( 'Maintenance', RSAM_TEXT_DOMAIN ); ?></option>
+                <option value="miscellaneous"><?php esc_html_e( 'Miscellaneous', RSAM_TEXT_DOMAIN ); ?></option>
+            </select>
+
+            <input type="date" id="rsam-expense-date-filter" name="date_filter" class="rsam-filter-field">
+		</div>
+
+		<div class="rsam-list-table-wrapper">
+			<table class="rsam-list-table" id="rsam-expenses-table">
+				<thead>
+					<tr>
+						<th><?php esc_html_e( 'Date', RSAM_TEXT_DOMAIN ); ?></th>
+						<th><?php esc_html_e( 'Category', RSAM_TEXT_DOMAIN ); ?></th>
+						<th><?php esc_html_e( 'Amount', RSAM_TEXT_DOMAIN ); ?></th>
+						<th><?php esc_html_e( 'Description', RSAM_TEXT_DOMAIN ); ?></th>
+						<th><?php esc_html_e( 'Actions', RSAM_TEXT_DOMAIN ); ?></th>
+					</tr>
+				</thead>
+				<tbody id="rsam-expenses-table-body">
+					<tr>
+						<td colspan="5" class="rsam-list-loading">
+							<span class="rsam-loader-spinner"></span> <?php esc_html_e( 'Loading expenses...', RSAM_TEXT_DOMAIN ); ?>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<div class="rsam-pagination" id="rsam-expenses-pagination">
+			</div>
+
+		<div id="rsam-expense-form-container" style="display: none;">
+			<form id="rsam-expense-form" class="rsam-form">
+				<input type="hidden" name="expense_id" value="0">
+				
+                <div class="rsam-form-grid">
+                    <div class="rsam-form-field">
+                        <label for="rsam-expense-date"><?php esc_html_e( 'Expense Date', RSAM_TEXT_DOMAIN ); ?> <span class="rsam-required">*</span></label>
+                        <input type="date" id="rsam-expense-date" name="expense_date" required>
+                    </div>
+                    <div class="rsam-form-field">
+                        <label for="rsam-expense-amount"><?php esc_html_e( 'Amount', RSAM_TEXT_DOMAIN ); ?> <span class="rsam-required">*</span></label>
+                        <input type="number" id="rsam-expense-amount" name="amount" step="0.01" min="0" required>
+                    </div>
+                </div>
+
+				<div class="rsam-form-field">
+					<label for="rsam-expense-category"><?php esc_html_e( 'Category', RSAM_TEXT_DOMAIN ); ?> <span class="rsam-required">*</span></label>
+					<select id="rsam-expense-category" name="category" required>
+                        <option value=""><?php esc_html_e( 'Select Category', RSAM_TEXT_DOMAIN ); ?></option>
+                        <option value="rent"><?php esc_html_e( 'Shop Rent', RSAM_TEXT_DOMAIN ); ?></option>
+                        <option value="salary"><?php esc_html_e( 'Employee Salary', RSAM_TEXT_DOMAIN ); ?></option>
+                        <option value="utility"><?php esc_html_e( 'Utilities (Electricity, Water)', RSAM_TEXT_DOMAIN ); ?></option>
+                        <option value="maintenance"><?php esc_html_e( 'Maintenance', RSAM_TEXT_DOMAIN ); ?></option>
+                        <option value="miscellaneous"><?php esc_html_e( 'Miscellaneous', RSAM_TEXT_DOMAIN ); ?></option>
+                    </select>
+				</div>
+                
+                <div class="rsam-form-field" id="rsam-expense-employee-field" style="display: none;">
+                    <label for="rsam-expense-employee-id"><?php esc_html_e( 'Employee', RSAM_TEXT_DOMAIN ); ?> <span class="rsam-required">*</span></label>
+                    <select id="rsam-expense-employee-id" name="employee_id">
+                        <option value="0"><?php esc_html_e( 'Select Employee', RSAM_TEXT_DOMAIN ); ?></option>
+                        </select>
+                </div>
+
+                <div class="rsam-form-field">
+					<label for="rsam-expense-description"><?php esc_html_e( 'Description / Notes', RSAM_TEXT_DOMAIN ); ?></label>
+					<textarea id="rsam-expense-description" name="description" rows="3"></textarea>
+				</div>
+
+			</form>
+		</div>
+	</template>
+	<?php
+}
+
+/**
+ * (AJAX) Handler: (Expenses) ki list (fetch) karne ke liye.
+ */
+function rsam_ajax_get_expenses() {
+	// (Security) checks
+	check_ajax_referer( 'rsam-ajax-nonce', 'nonce' );
+	if ( ! current_user_can( 'rsam_manage_expenses' ) ) {
+		wp_send_json_error( [ 'message' => __( 'You do not have permission.', RSAM_TEXT_DOMAIN ) ], 403 );
+	}
+
+	global $wpdb;
+	$tables = rsam_get_table_names();
+
+	// (Pagination) parameters
+	$page = isset( $_POST['page'] ) ? absint( $_POST['page'] ) : 1;
+	$limit = 20;
+	$offset = ( $page - 1 ) * $limit;
+
+	// (Filters) & (Search)
+	$search = isset( $_POST['search'] ) ? sanitize_text_field( wp_unslash( $_POST['search'] ) ) : '';
+    $category = isset( $_POST['category'] ) ? sanitize_key( $_POST['category'] ) : '';
+    $date = isset( $_POST['date'] ) ? sanitize_text_field( $_POST['date'] ) : '';
+
+	$where_clause = [];
+	$params = [];
 	
+    $where_clause[] = '1=1'; // (Base condition)
+
+	if ( ! empty( $search ) ) {
+		$where_clause[] = 'e.description LIKE %s';
+		$params[] = '%' . $wpdb->esc_like( $search ) . '%';
+	}
+    if ( ! empty( $category ) ) {
+        $where_clause[] = 'e.category = %s';
+        $params[] = $category;
+    }
+    if ( ! empty( $date ) ) {
+        $where_clause[] = 'e.expense_date = %s';
+        $params[] = $date;
+    }
+    
+    $where_sql = ' WHERE ' . implode( ' AND ', $where_clause );
+
+	// (Total items) (count) karein
+	$total_items = $wpdb->get_var( $wpdb->prepare(
+		"SELECT COUNT(e.id) FROM {$tables['expenses']} e $where_sql",
+		$params
+	) );
+
+	// (Expenses) (fetch) karein
+	$query = $wpdb->prepare(
+		"SELECT 
+			e.*,
+            emp.name as employee_name
+		FROM 
+			{$tables['expenses']} e
+        LEFT JOIN
+            {$tables['employees']} emp ON e.employee_id = emp.id
+		$where_sql
+		ORDER BY 
+			e.expense_date DESC, e.id DESC
+		LIMIT %d
+		OFFSET %d",
+		array_merge( $params, [ $limit, $offset ] )
+	);
+
+	$expenses = $wpdb->get_results( $query );
+    
+    // (Categories) ke (labels)
+    $categories = [
+        'rent' => __( 'Shop Rent', RSAM_TEXT_DOMAIN ),
+        'salary' => __( 'Employee Salary', RSAM_TEXT_DOMAIN ),
+        'utility' => __( 'Utilities', RSAM_TEXT_DOMAIN ),
+        'maintenance' => __( 'Maintenance', RSAM_TEXT_DOMAIN ),
+        'miscellaneous' => __( 'Miscellaneous', RSAM_TEXT_DOMAIN ),
+    ];
+    
+    // (Data) ko (format) karein
+    foreach ( $expenses as $expense ) {
+        $expense->amount_formatted = rsam_format_price( $expense->amount );
+        $expense->expense_date_formatted = wp_date( get_option( 'date_format' ), strtotime( $expense->expense_date ) );
+        $expense->category_label = isset( $categories[$expense->category] ) ? $categories[$expense->category] : ucfirst( $expense->category );
+        
+        // Agar (salary) hai to (employee) ka naam dikhayein
+        if ( $expense->category === 'salary' && ! empty( $expense->employee_name ) ) {
+            // NOTE: Description ko sanitize karna zaroori hai agar isey HTML mein istemal kiya ja raha hai
+            $expense->description = $expense->employee_name . ( ! empty( $expense->description ) ? ' - ' . $expense->description : '' );
+        }
+    }
+
+	wp_send_json_success( [
+		'expenses'   => $expenses,
+		'pagination' => [
+			'total_items' => (int) $total_items,
+			'total_pages' => ceil( $total_items / $limit ),
+			'current_page' => $page,
+		],
+	] );
+}
+add_action( 'wp_ajax_rsam_get_expenses', 'rsam_ajax_get_expenses' );
+
+
+/**
+ * (AJAX) Handler: Naya (Expense) (save) ya (update) karne ke liye.
+ */
+function rsam_ajax_save_expense() {
+	// (Security) checks
+	check_ajax_referer( 'rsam-ajax-nonce', 'nonce' );
+	if ( ! current_user_can( 'rsam_manage_expenses' ) ) {
+		wp_send_json_error( [ 'message' => __( 'You do not have permission.', RSAM_TEXT_DOMAIN ) ], 403 );
+	}
+
+	// (POST data) (parse) karein
+	parse_str( wp_unslash( $_POST['form_data'] ), $data );
+
+	// (Validate) aur (sanitize) karein
+	$expense_id = isset( $data['expense_id'] ) ? absint( $data['expense_id'] ) : 0;
+	$expense_date = isset( $data['expense_date'] ) ? sanitize_text_field( $data['expense_date'] ) : '';
+    $amount = isset( $data['amount'] ) ? floatval( $data['amount'] ) : 0;
+    $category = isset( $data['category'] ) ? sanitize_key( $data['category'] ) : '';
+    $employee_id = isset( $data['employee_id'] ) ? absint( $data['employee_id'] ) : 0;
+	$description = isset( $data['description'] ) ? sanitize_textarea_field( $data['description'] ) : '';
+
+	// (Validation)
+	if ( empty( $expense_date ) || empty( $category ) || $amount <= 0 ) {
+		wp_send_json_error( [ 'message' => __( 'Please fill all required fields (Date, Amount, Category).', RSAM_TEXT_DOMAIN ) ], 400 );
+	}
+    
+    // Agar (category) (salary) hai, to (employee) (ID) zaroori hai
+    if ( $category === 'salary' && $employee_id === 0 ) {
+         wp_send_json_error( [ 'message' => __( 'Please select an employee for salary expense.', RSAM_TEXT_DOMAIN ) ], 400 );
+    }
+
+	global $wpdb;
+	$tables = rsam_get_table_names();
+
+	$db_data = [
+		'expense_date' => $expense_date,
+		'amount'       => $amount,
+        'category'     => $category,
+        'employee_id'  => ( $category === 'salary' ) ? $employee_id : 0, // Sirf (salary) ke liye (save) karein
+		'description'  => $description,
+	];
+    
+    $db_formats = [ '%s', '%f', '%s', '%d', '%s' ];
+
+	// (Update) ya (Insert)
+	if ( $expense_id > 0 ) {
+		// Update
+		$result = $wpdb->update(
+			$tables['expenses'],
+			$db_data,
+			[ 'id' => $expense_id ], // (WHERE)
+			$db_formats,
+			[ '%d' ] // (WHERE format)
+		);
+        $message = __( 'Expense updated successfully.', RSAM_TEXT_DOMAIN );
+	} else {
+		// Insert
+        $db_data['created_at'] = current_time( 'mysql' );
+        $db_formats[] = '%s';
+        
+		$result = $wpdb->insert(
+			$tables['expenses'],
+			$db_data,
+			$db_formats
+		);
+        $expense_id = $wpdb->insert_id;
+        $message = __( 'Expense added successfully.', RSAM_TEXT_DOMAIN );
+	}
+
+	if ( $result === false ) {
+		wp_send_json_error( [ 'message' => __( 'Database error. Could not save expense.', RSAM_TEXT_DOMAIN ) ], 500 );
+	}
+
+	wp_send_json_success( [ 'message' => $message, 'expense_id' => $expense_id ] );
+}
+add_action( 'wp_ajax_rsam_save_expense', 'rsam_ajax_save_expense' );
+
+
+/**
+ * (AJAX) Handler: (Expense) (delete) karne ke liye.
+ */
+function rsam_ajax_delete_expense() {
+	// (Security) checks
+	check_ajax_referer( 'rsam-ajax-nonce', 'nonce' );
+	if ( ! current_user_can( 'rsam_manage_expenses' ) ) {
+		wp_send_json_error( [ 'message' => __( 'You do not have permission.', RSAM_TEXT_DOMAIN ) ], 403 );
+	}
+
+	$expense_id = isset( $_POST['expense_id'] ) ? absint( $_POST['expense_id'] ) : 0;
+
+	if ( $expense_id <= 0 ) {
+		wp_send_json_error( [ 'message' => __( 'Invalid Expense ID.', RSAM_TEXT_DOMAIN ) ], 400 );
+	}
+
+	global $wpdb;
+	$tables = rsam_get_table_names();
+
+	$result = $wpdb->delete( $tables['expenses'], [ 'id' => $expense_id ], [ '%d' ] );
+
+	if ( $result ) {
+		wp_send_json_success( [ 'message' => __( 'Expense deleted successfully.', RSAM_TEXT_DOMAIN ) ] );
+	} else {
+		wp_send_json_error( [ 'message' => __( 'Could not delete expense.', RSAM_TEXT_DOMAIN ) ], 500 );
+	}
+}
+add_action( 'wp_ajax_rsam_delete_expense', 'rsam_ajax_delete_expense' );
+
+/**
+ * Part 10 — Employees (Templates + AJAX)
+ */
+
+/**
+ * Employees Screen ke liye (HTML <template>)
+ */
+function rsam_template_employees() {
+	?>
+	<template id="rsam-tmpl-employees">
+		<div class="rsam-screen-header">
+			<h1><?php esc_html_e( 'Employees', RSAM_TEXT_DOMAIN ); ?></h1>
+			<button type="button" class="button button-primary" id="rsam-add-new-employee">
+				<span class="dashicons dashicons-plus-alt"></span>
+				<?php esc_html_e( 'Add New Employee', RSAM_TEXT_DOMAIN ); ?>
+			</button>
+		</div>
+
+		<div class="rsam-list-controls">
+			<input type="search" id="rsam-employee-search" class="rsam-search-field" placeholder="<?php esc_attr_e( 'Search by name or phone...', RSAM_TEXT_DOMAIN ); ?>">
+		</div>
+
+		<div class="rsam-list-table-wrapper">
+			<table class="rsam-list-table" id="rsam-employees-table">
+				<thead>
+					<tr>
+						<th><?php esc_html_e( 'Name', RSAM_TEXT_DOMAIN ); ?></th>
+						<th><?php esc_html_e( 'Designation', RSAM_TEXT_DOMAIN ); ?></th>
+						<th><?php esc_html_e( 'Phone', RSAM_TEXT_DOMAIN ); ?></th>
+						<th><?php esc_html_e( 'Monthly Salary', RSAM_TEXT_DOMAIN ); ?></th>
+                        <th><?php esc_html_e( 'Status', RSAM_TEXT_DOMAIN ); ?></th>
+						<th><?php esc_html_e( 'Actions', RSAM_TEXT_DOMAIN ); ?></th>
+					</tr>
+				</thead>
+				<tbody id="rsam-employees-table-body">
+					<tr>
+						<td colspan="6" class="rsam-list-loading">
+							<span class="rsam-loader-spinner"></span> <?php esc_html_e( 'Loading employees...', RSAM_TEXT_DOMAIN ); ?>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<div class="rsam-pagination" id="rsam-employees-pagination">
+			</div>
+
+		<div id="rsam-employee-form-container" style="display: none;">
+			<form id="rsam-employee-form" class="rsam-form">
+				<input type="hidden" name="employee_id" value="0">
+				
+                <div class="rsam-form-field">
+					<label for="rsam-employee-name"><?php esc_html_e( 'Full Name', RSAM_TEXT_DOMAIN ); ?> <span class="rsam-required">*</span></label>
+					<input type="text" id="rsam-employee-name" name="name" required>
+				</div>
+                
+                <div class="rsam-form-grid">
+                    <div class="rsam-form-field">
+                        <label for="rsam-employee-designation"><?php esc_html_e( 'Designation', RSAM_TEXT_DOMAIN ); ?></label>
+                        <input type="text" id="rsam-employee-designation" name="designation" placeholder="<?php esc_attr_e( 'e.g., Salesman, Manager', RSAM_TEXT_DOMAIN ); ?>">
+                    </div>
+                    <div class="rsam-form-field">
+                        <label for="rsam-employee-phone"><?php esc_html_e( 'Phone Number', RSAM_TEXT_DOMAIN ); ?></label>
+                        <input type="tel" id="rsam-employee-phone" name="phone">
+                    </div>
+                </div>
+
+                <div class="rsam-form-grid">
+                    <div class="rsam-form-field">
+                        <label for="rsam-employee-salary"><?php esc_html_e( 'Monthly Salary', RSAM_TEXT_DOMAIN ); ?> <span class="rsam-required">*</span></label>
+                        <input type="number" id="rsam-employee-salary" name="monthly_salary" step="0.01" min="0" required>
+                    </div>
+                    <div class="rsam-form-field">
+                        <label for="rsam-employee-joining-date"><?php esc_html_e( 'Joining Date', RSAM_TEXT_DOMAIN ); ?></label>
+                        <input type="date" id="rsam-employee-joining-date" name="joining_date">
+                    </div>
+                </div>
+                
+                <div class="rsam-form-field">
+                    <label>
+                        <input type="checkbox" name="is_active" id="rsam-employee-is-active" value="1" checked>
+                        <?php esc_html_e( 'Employee is Active', RSAM_TEXT_DOMAIN ); ?>
+                    </label>
+                </div>
+			</form>
+		</div>
+	</template>
+	<?php
+}
+
+/**
+ * (AJAX) Handler: (Employees) ki list (fetch) karne ke liye.
+ */
+function rsam_ajax_get_employees() {
+	// (Security) checks
+	check_ajax_referer( 'rsam-ajax-nonce', 'nonce' );
+	if ( ! current_user_can( 'rsam_manage_employees' ) && ! current_user_can( 'rsam_manage_expenses' ) ) { // Expenses ke liye bhi access zaroori hai
+		wp_send_json_error( [ 'message' => __( 'You do not have permission.', RSAM_TEXT_DOMAIN ) ], 403 );
+	}
+
+	global $wpdb;
+	$tables = rsam_get_table_names();
+
+	// (Pagination) parameters
+	$page = isset( $_POST['page'] ) ? absint( $_POST['page'] ) : 1;
+	$limit = 20;
+	$offset = ( $page - 1 ) * $limit;
+
+	// (Search) parameter
+	$search = isset( $_POST['search'] ) ? sanitize_text_field( wp_unslash( $_POST['search'] ) ) : '';
+
+	// (Query) conditions
+	$where_clause = '';
+	$params = [];
+	if ( ! empty( $search ) ) {
+        $search_like = '%' . $wpdb->esc_like( $search ) . '%';
+		$where_clause = ' WHERE (name LIKE %s OR phone LIKE %s)';
+		$params[] = $search_like;
+        $params[] = $search_like;
+	}
+	
+	// Agar limit = -1 hai (dropdown ke liye) to pagination skip karein
+	if ( isset( $_POST['limit'] ) && absint( $_POST['limit'] ) === -1 ) {
+	    $limit = 999;
+	    $offset = 0;
+	}
+
+
+	// (Total items) (count) karein
+	$total_items = $wpdb->get_var( $wpdb->prepare(
+		"SELECT COUNT(id) FROM {$tables['employees']} $where_clause",
+		$params
+	) );
+
+	// (Employees) (fetch) karein
+	$query = $wpdb->prepare(
+		"SELECT * FROM {$tables['employees']}
+		$where_clause
+		ORDER BY 
+			name ASC
+		LIMIT %d
+		OFFSET %d",
+		array_merge( $params, [ $limit, $offset ] )
+	);
+
+	$employees = $wpdb->get_results( $query );
+    
+    // (Data) ko (format) karein
+    foreach ( $employees as $employee ) {
+        $employee->monthly_salary_formatted = rsam_format_price( $employee->monthly_salary );
+        $employee->status_label = $employee->is_active ? __( 'Active', RSAM_TEXT_DOMAIN ) : __( 'Inactive', RSAM_TEXT_DOMAIN );
+    }
+
+	wp_send_json_success( [
+		'employees'  => $employees,
+		'pagination' => [
+			'total_items' => (int) $total_items,
+			'total_pages' => ceil( $total_items / $limit ),
+			'current_page' => $page,
+		],
+	] );
+}
+add_action( 'wp_ajax_rsam_get_employees', 'rsam_ajax_get_employees' );
+
+
+/**
+ * (AJAX) Handler: Naya (Employee) (save) ya (update) karne ke liye.
+ */
+function rsam_ajax_save_employee() {
+	// (Security) checks
+	check_ajax_referer( 'rsam-ajax-nonce', 'nonce' );
+	if ( ! current_user_can( 'rsam_manage_employees' ) ) {
+		wp_send_json_error( [ 'message' => __( 'You do not have permission.', RSAM_TEXT_DOMAIN ) ], 403 );
+	}
+
+	// (POST data) (parse) karein
+	parse_str( wp_unslash( $_POST['form_data'] ), $data );
+
+	// (Validate) aur (sanitize) karein
+	$employee_id = isset( $data['employee_id'] ) ? absint( $data['employee_id'] ) : 0;
+	$name = isset( $data['name'] ) ? sanitize_text_field( $data['name'] ) : '';
+    $designation = isset( $data['designation'] ) ? sanitize_text_field( $data['designation'] ) : '';
+    $phone = isset( $data['phone'] ) ? sanitize_text_field( $data['phone'] ) : '';
+    $monthly_salary = isset( $data['monthly_salary'] ) ? floatval( $data['monthly_salary'] ) : 0;
+    $joining_date = isset( $data['joining_date'] ) && ! empty( $data['joining_date'] ) ? sanitize_text_field( $data['joining_date'] ) : null;
+    $is_active = isset( $data['is_active'] ) ? 1 : 0;
+
+	// (Validation)
+	if ( empty( $name ) || $monthly_salary < 0 ) {
+		wp_send_json_error( [ 'message' => __( 'Please fill all required fields (Name, Salary).', RSAM_TEXT_DOMAIN ) ], 400 );
+	}
+
+	global $wpdb;
+	$tables = rsam_get_table_names();
+
+	$db_data = [
+		'name'           => $name,
+		'designation'    => $designation,
+        'phone'          => $phone,
+        'monthly_salary' => $monthly_salary,
+        'joining_date'   => $joining_date,
+        'is_active'      => $is_active,
+	];
+    
+    $db_formats = [ '%s', '%s', '%s', '%f', '%s', '%d' ];
+
+	// (Update) ya (Insert)
+	if ( $employee_id > 0 ) {
+		// Update
+		$result = $wpdb->update(
+			$tables['employees'],
+			$db_data,
+			[ 'id' => $employee_id ], // (WHERE)
+			$db_formats,
+			[ '%d' ] // (WHERE format)
+		);
+        $message = __( 'Employee updated successfully.', RSAM_TEXT_DOMAIN );
+	} else {
+		// Insert
+		$result = $wpdb->insert(
+			$tables['employees'],
+			$db_data,
+			$db_formats
+		);
+        $employee_id = $wpdb->insert_id;
+        $message = __( 'Employee added successfully.', RSAM_TEXT_DOMAIN );
+	}
+
+	if ( $result === false ) {
+		wp_send_json_error( [ 'message' => __( 'Database error. Could not save employee.', RSAM_TEXT_DOMAIN ) ], 500 );
+	}
+
+	wp_send_json_success( [ 'message' => $message, 'employee_id' => $employee_id ] );
+}
+add_action( 'wp_ajax_rsam_save_employee', 'rsam_ajax_save_employee' );
+
+
+/**
+ * (AJAX) Handler: (Employee) (delete) karne ke liye.
+ */
+function rsam_ajax_delete_employee() {
+	// (Security) checks
+	check_ajax_referer( 'rsam-ajax-nonce', 'nonce' );
+	if ( ! current_user_can( 'rsam_manage_employees' ) ) {
+		wp_send_json_error( [ 'message' => __( 'You do not have permission.', RSAM_TEXT_DOMAIN ) ], 403 );
+	}
+
+	$employee_id = isset( $_POST['employee_id'] ) ? absint( $_POST['employee_id'] ) : 0;
+
+	if ( $employee_id <= 0 ) {
+		wp_send_json_error( [ 'message' => __( 'Invalid Employee ID.', RSAM_TEXT_DOMAIN ) ], 400 );
+	}
+
+	global $wpdb;
+	$tables = rsam_get_table_names();
+    
+    // Check karein ke (employee) (salary) (expenses) mein (linked) to nahi
+    $expense_count = $wpdb->get_var( $wpdb->prepare(
+        "SELECT COUNT(id) FROM {$tables['expenses']} WHERE employee_id = %d AND category = 'salary'",
+        $employee_id
+    ) );
+    
+    if ( $expense_count > 0 ) {
+        wp_send_json_error( [ 'message' => __( 'Cannot delete. This employee has salary expense records. You can mark them as Inactive instead.', RSAM_TEXT_DOMAIN ) ], 400 );
+    }
+
+	$result = $wpdb->delete( $tables['employees'], [ 'id' => $employee_id ], [ '%d' ] );
+
+	if ( $result ) {
+		wp_send_json_success( [ 'message' => __( 'Employee deleted successfully.', RSAM_TEXT_DOMAIN ) ] );
+	} else {
+		wp_send_json_error( [ 'message' => __( 'Could not delete employee.', RSAM_TEXT_DOMAIN ) ], 500 );
+	}
+}
+add_action( 'wp_ajax_rsam_delete_employee', 'rsam_ajax_delete_employee' );
+
+/**
+ * Part 11 — Suppliers (Templates + AJAX)
+ */
+
+/**
+ * Suppliers Screen ke liye (HTML <template>)
+ */
+function rsam_template_suppliers() {
+	?>
+	<template id="rsam-tmpl-suppliers">
+		<div class="rsam-screen-header">
+			<h1><?php esc_html_e( 'Suppliers', RSAM_TEXT_DOMAIN ); ?></h1>
+			<button type="button" class="button button-primary" id="rsam-add-new-supplier">
+				<span class="dashicons dashicons-plus-alt"></span>
+				<?php esc_html_e( 'Add New Supplier', RSAM_TEXT_DOMAIN ); ?>
+			</button>
+		</div>
+
+		<div class="rsam-list-controls">
+			<input type="search" id="rsam-supplier-search" class="rsam-search-field" placeholder="<?php esc_attr_e( 'Search by name or phone...', RSAM_TEXT_DOMAIN ); ?>">
+		</div>
+
+		<div class="rsam-list-table-wrapper">
+			<table class="rsam-list-table" id="rsam-suppliers-table">
+				<thead>
+					<tr>
+						<th><?php esc_html_e( 'Name', RSAM_TEXT_DOMAIN ); ?></th>
+						<th><?php esc_html_e( 'Phone', RSAM_TEXT_DOMAIN ); ?></th>
+						<th><?php esc_html_e( 'Address', RSAM_TEXT_DOMAIN ); ?></th>
+						<th><?php esc_html_e( 'Actions', RSAM_TEXT_DOMAIN ); ?></th>
+					</tr>
+				</thead>
+				<tbody id="rsam-suppliers-table-body">
+					<tr>
+						<td colspan="4" class="rsam-list-loading">
+							<span class="rsam-loader-spinner"></span> <?php esc_html_e( 'Loading suppliers...', RSAM_TEXT_DOMAIN ); ?>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<div class="rsam-pagination" id="rsam-suppliers-pagination">
+			</div>
+
+		<div id="rsam-supplier-form-container" style="display: none;">
+			<form id="rsam-supplier-form" class="rsam-form">
+				<input type="hidden" name="supplier_id" value="0">
+				
+                <div class="rsam-form-grid">
+                    <div class="rsam-form-field">
+                        <label for="rsam-supplier-name"><?php esc_html_e( 'Supplier Name', RSAM_TEXT_DOMAIN ); ?> <span class="rsam-required">*</span></label>
+                        <input type="text" id="rsam-supplier-name" name="name" required>
+                    </div>
+                    <div class="rsam-form-field">
+                        <label for="rsam-supplier-phone"><?php esc_html_e( 'Phone Number', RSAM_TEXT_DOMAIN ); ?></label>
+                        <input type="tel" id="rsam-supplier-phone" name="phone">
+                    </div>
+                </div>
+
+                <div class="rsam-form-field">
+					<label for="rsam-supplier-address"><?php esc_html_e( 'Address', RSAM_TEXT_DOMAIN ); ?></label>
+					<textarea id="rsam-supplier-address" name="address" rows="3"></textarea>
+				</div>
+			</form>
+		</div>
+	</template>
+	<?php
+}
+
+/**
+ * (AJAX) Handler: (Suppliers) ki list (fetch) karne ke liye.
+ */
+function rsam_ajax_get_suppliers() {
+	// (Security) checks
+	check_ajax_referer( 'rsam-ajax-nonce', 'nonce' );
+    // (Purchases) (manage) karne walay (Suppliers) dekh sakte hain
+	if ( ! current_user_can( 'rsam_manage_suppliers' ) && ! current_user_can( 'rsam_manage_purchases' ) ) { 
+		wp_send_json_error( [ 'message' => __( 'You do not have permission.', RSAM_TEXT_DOMAIN ) ], 403 );
+	}
+
+	global $wpdb;
+	$tables = rsam_get_table_names();
+
+	// (Pagination) parameters
+	$page = isset( $_POST['page'] ) ? absint( $_POST['page'] ) : 1;
+    // Agar (dropdown) ke liye (fetch) kar rahe hain to (limit) (-1) hogi (ya (search) hoga)
+    $limit_input = isset( $_POST['limit'] ) ? absint( $_POST['limit'] ) : 20;
+	$limit = ( $limit_input === -1 ) ? 999 : $limit_input;
+	$offset = ( $page - 1 ) * $limit;
+
+	// (Search) parameter
+	$search = isset( $_POST['search'] ) ? sanitize_text_field( wp_unslash( $_POST['search'] ) ) : '';
+
+	// (Query) conditions
+	$where_clause = '';
+	$params = [];
+	if ( ! empty( $search ) ) {
+        $search_like = '%' . $wpdb->esc_like( $search ) . '%';
+		$where_clause = ' WHERE (name LIKE %s OR phone LIKE %s)';
+		$params[] = $search_like;
+        $params[] = $search_like;
+	}
+    
+    $limit_sql = '';
+    if ( $limit_input !== -1 ) {
+        $limit_sql = 'LIMIT %d OFFSET %d';
+        $params[] = $limit;
+        $params[] = $offset;
+    }
+
+	// (Total items) (count) karein (sirf (pagination) ke liye)
+    $total_items = 0;
+    if ( $limit_input !== -1 ) {
+        // Prepare the count query without limit/offset params
+        $count_query_params = $params;
+        if ( $limit_sql ) {
+            // Remove limit and offset from parameters array if present (assuming they are the last two)
+            array_pop( $count_query_params );
+            array_pop( $count_query_params );
+        }
+        $total_items = $wpdb->get_var( $wpdb->prepare(
+            "SELECT COUNT(id) FROM {$tables['suppliers']} $where_clause",
+            $count_query_params
+        ) );
+    }
+
+	// (Suppliers) (fetch) karein
+	$query = $wpdb->prepare(
+		"SELECT id, name, phone, address FROM {$tables['suppliers']}
+		$where_clause
+		ORDER BY name ASC
+		$limit_sql",
+		$params
+	);
+
+	$suppliers = $wpdb->get_results( $query );
+
+	wp_send_json_success( [
+		'suppliers'  => $suppliers,
+		'pagination' => ( $limit_input !== -1 ) ? [
+			'total_items' => (int) $total_items,
+			'total_pages' => ceil( $total_items / $limit_input ),
+			'current_page' => $page,
+		] : null,
+	] );
+}
+add_action( 'wp_ajax_rsam_get_suppliers', 'rsam_ajax_get_suppliers' );
+
+
+/**
+ * (AJAX) Handler: Naya (Supplier) (save) ya (update) karne ke liye.
+ */
+function rsam_ajax_save_supplier() {
+	// (Security) checks
+	check_ajax_referer( 'rsam-ajax-nonce', 'nonce' );
+	if ( ! current_user_can( 'rsam_manage_suppliers' ) && ! current_user_can( 'rsam_manage_purchases' ) ) {
+		wp_send_json_error( [ 'message' => __( 'You do not have permission.', RSAM_TEXT_DOMAIN ) ], 403 );
+	}
+
+	// (POST data) (parse) karein
+	parse_str( wp_unslash( $_POST['form_data'] ), $data );
+
+	// (Validate) aur (sanitize) karein
+	$supplier_id = isset( $data['supplier_id'] ) ? absint( $data['supplier_id'] ) : 0;
+	$name = isset( $data['name'] ) ? sanitize_text_field( $data['name'] ) : '';
+    $phone = isset( $data['phone'] ) ? sanitize_text_field( $data['phone'] ) : '';
+    $address = isset( $data['address'] ) ? sanitize_textarea_field( $data['address'] ) : '';
+
+	// (Validation)
+	if ( empty( $name ) ) {
+		wp_send_json_error( [ 'message' => __( 'Please fill the required field (Name).', RSAM_TEXT_DOMAIN ) ], 400 );
+	}
+
+	global $wpdb;
+	$tables = rsam_get_table_names();
+
+	$db_data = [
+		'name'    => $name,
+        'phone'   => $phone,
+        'address' => $address,
+	];
+    
+    $db_formats = [ '%s', '%s', '%s' ];
+
+	// (Update) ya (Insert)
+	if ( $supplier_id > 0 ) {
+		// Update
+		$result = $wpdb->update(
+			$tables['suppliers'],
+			$db_data,
+			[ 'id' => $supplier_id ], // (WHERE)
+			$db_formats,
+			[ '%d' ] // (WHERE format)
+		);
+        $message = __( 'Supplier updated successfully.', RSAM_TEXT_DOMAIN );
+	} else {
+		// Insert
+        $db_data['created_at'] = current_time( 'mysql' );
+        $db_formats[] = '%s';
+        
+		$result = $wpdb->insert(
+			$tables['suppliers'],
+			$db_data,
+			$db_formats
+		);
+        $supplier_id = $wpdb->insert_id;
+        $message = __( 'Supplier added successfully.', RSAM_TEXT_DOMAIN );
+	}
+
+	if ( $result === false ) {
+		wp_send_json_error( [ 'message' => __( 'Database error. Could not save supplier.', RSAM_TEXT_DOMAIN ) ], 500 );
+	}
+
+    // (Quick Add) ke liye naya (supplier object) (return) karein
+    $new_supplier = $wpdb->get_row( $wpdb->prepare( "SELECT id, name FROM {$tables['suppliers']} WHERE id = %d", $supplier_id ) );
+
+	wp_send_json_success( [ 
+        'message' => $message, 
+        'supplier' => $new_supplier // (Dropdown) ko (update) karne ke liye
+    ] );
+}
+add_action( 'wp_ajax_rsam_save_supplier', 'rsam_ajax_save_supplier' );
+
+
+/**
+ * (AJAX) Handler: (Supplier) (delete) karne ke liye.
+ */
+function rsam_ajax_delete_supplier() {
+	// (Security) checks
+	check_ajax_referer( 'rsam-ajax-nonce', 'nonce' );
+	if ( ! current_user_can( 'rsam_manage_suppliers' ) ) {
+		wp_send_json_error( [ 'message' => __( 'You do not have permission.', RSAM_TEXT_DOMAIN ) ], 403 );
+	}
+
+	$supplier_id = isset( $_POST['supplier_id'] ) ? absint( $_POST['supplier_id'] ) : 0;
+
+	if ( $supplier_id <= 0 ) {
+		wp_send_json_error( [ 'message' => __( 'Invalid Supplier ID.', RSAM_TEXT_DOMAIN ) ], 400 );
+	}
+
+	global $wpdb;
+	$tables = rsam_get_table_names();
+    
+    // Check karein ke (supplier) (purchases) mein (linked) to nahi
+    $purchase_count = $wpdb->get_var( $wpdb->prepare(
+        "SELECT COUNT(id) FROM {$tables['purchases']} WHERE supplier_id = %d",
+        $supplier_id
+    ) );
+    
+    if ( $purchase_count > 0 ) {
+        wp_send_json_error( [ 'message' => __( 'Cannot delete. This supplier is linked to existing purchases.', RSAM_TEXT_DOMAIN ) ], 400 );
+    }
+
+	$result = $wpdb->delete( $tables['suppliers'], [ 'id' => $supplier_id ], [ '%d' ] );
+
+	if ( $result ) {
+		wp_send_json_success( [ 'message' => __( 'Supplier deleted successfully.', RSAM_TEXT_DOMAIN ) ] );
+	} else {
+		wp_send_json_error( [ 'message' => __( 'Could not delete supplier.', RSAM_TEXT_DOMAIN ) ], 500 );
+	}
+}
+add_action( 'wp_ajax_rsam_delete_supplier', 'rsam_ajax_delete_supplier' );
+
+/**
+ * Part 12 — Customers (Khata) (Templates + AJAX)
+ */
+
+/**
+ * Customers Screen ke liye (HTML <template>)
+ */
+function rsam_template_customers() {
+	?>
+	<template id="rsam-tmpl-customers">
+		<div class="rsam-screen-header">
+			<h1><?php esc_html_e( 'Customers (Khata Book)', RSAM_TEXT_DOMAIN ); ?></h1>
+			<button type="button" class="button button-primary" id="rsam-add-new-customer">
+				<span class="dashicons dashicons-plus-alt"></span>
+				<?php esc_html_e( 'Add New Customer', RSAM_TEXT_DOMAIN ); ?>
+			</button>
+		</div>
+
+		<div class="rsam-list-controls">
+			<input type="search" id="rsam-customer-search" class="rsam-search-field" placeholder="<?php esc_attr_e( 'Search by name or phone...', RSAM_TEXT_DOMAIN ); ?>">
+		</div>
+
+		<div class="rsam-list-table-wrapper">
+			<table class="rsam-list-table" id="rsam-customers-table">
+				<thead>
+					<tr>
+						<th><?php esc_html_e( 'Name', RSAM_TEXT_DOMAIN ); ?></th>
+						<th><?php esc_html_e( 'Phone', RSAM_TEXT_DOMAIN ); ?></th>
+						<th><?php esc_html_e( 'Credit Balance (Dues)', RSAM_TEXT_DOMAIN ); ?></th>
+						<th><?php esc_html_e( 'Actions', RSAM_TEXT_DOMAIN ); ?></th>
+					</tr>
+				</thead>
+				<tbody id="rsam-customers-table-body">
+					<tr>
+						<td colspan="4" class="rsam-list-loading">
+							<span class="rsam-loader-spinner"></span> <?php esc_html_e( 'Loading customers...', RSAM_TEXT_DOMAIN ); ?>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<div class="rsam-pagination" id="rsam-customers-pagination">
+			</div>
+
+		<div id="rsam-customer-form-container" style="display: none;">
+			<form id="rsam-customer-form" class="rsam-form">
+				<input type="hidden" name="customer_id" value="0">
+				
+                <div class="rsam-form-grid">
+                    <div class="rsam-form-field">
+                        <label for="rsam-customer-name"><?php esc_html_e( 'Customer Name', RSAM_TEXT_DOMAIN ); ?> <span class="rsam-required">*</span></label>
+                        <input type="text" id="rsam-customer-name" name="name" required>
+                    </div>
+                    <div class="rsam-form-field">
+                        <label for="rsam-customer-phone"><?php esc_html_e( 'Phone Number', RSAM_TEXT_DOMAIN ); ?></label>
+                        <input type="tel" id="rsam-customer-phone" name="phone">
+                    </div>
+                </div>
+
+                <div class="rsam-form-field">
+					<label for="rsam-customer-address"><?php esc_html_e( 'Address', RSAM_TEXT_DOMAIN ); ?></label>
+					<textarea id="rsam-customer-address" name="address" rows="3"></textarea>
+				</div>
+                <p class="rsam-form-note"><?php esc_html_e( 'Note: Credit balance is automatically updated from (Unpaid) Sales and (Payment) records.', RSAM_TEXT_DOMAIN ); ?></p>
+			</form>
+		</div>
+        
+        <div id="rsam-customer-payment-form-container" style="display: none;">
+			<form id="rsam-customer-payment-form" class="rsam-form">
+				<input type="hidden" name="customer_id" value="0">
+                
+                <h3 class="rsam-payment-customer-name"></h3>
+                <p class="rsam-payment-current-balance"></p>
+
+                <hr>
+                
+                <div class="rsam-form-grid">
+                    <div class="rsam-form-field">
+                        <label for="rsam-payment-amount"><?php esc_html_e( 'Payment Amount', RSAM_TEXT_DOMAIN ); ?> <span class="rsam-required">*</span></label>
+                        <input type="number" id="rsam-payment-amount" name="amount" step="0.01" min="0.01" required>
+                    </div>
+                    <div class="rsam-form-field">
+                        <label for="rsam-payment-date"><?php esc_html_e( 'Payment Date', RSAM_TEXT_DOMAIN ); ?> <span class="rsam-required">*</span></label>
+                        <input type="date" id="rsam-payment-date" name="payment_date" required>
+                    </div>
+                </div>
+                
+                <div class="rsam-form-field">
+					<label for="rsam-payment-notes"><?php esc_html_e( 'Notes / Remarks', RSAM_TEXT_DOMAIN ); ?></label>
+					<textarea id="rsam-payment-notes" name="notes" rows="3"></textarea>
+				</div>
+			</form>
+		</div>
+	</template>
+	<?php
+}
+
+/**
+ * (AJAX) Handler: (Customers) ki list (fetch) karne ke liye.
+ */
+function rsam_ajax_get_customers() {
+	// (Security) checks
+	check_ajax_referer( 'rsam-ajax-nonce', 'nonce' );
+    // (Sales) (manage) karne walay (Customers) dekh sakte hain
+	if ( ! current_user_can( 'rsam_manage_customers' ) && ! current_user_can( 'rsam_manage_sales' ) ) { 
+		wp_send_json_error( [ 'message' => __( 'You do not have permission.', RSAM_TEXT_DOMAIN ) ], 403 );
+	}
+
+	global $wpdb;
+	$tables = rsam_get_table_names();
+
+	// (Pagination) parameters
+	$page = isset( $_POST['page'] ) ? absint( $_POST['page'] ) : 1;
+    $limit_input = isset( $_POST['limit'] ) ? absint( $_POST['limit'] ) : 20;
+	$limit = ( $limit_input === -1 ) ? 999 : $limit_input;
+	$offset = ( $page - 1 ) * $limit;
+
+	// (Search) parameter
+	$search = isset( $_POST['search'] ) ? sanitize_text_field( wp_unslash( $_POST['search'] ) ) : '';
+
+	// (Query) conditions
+	$where_clause = '';
+	$params = [];
+	if ( ! empty( $search ) ) {
+        $search_like = '%' . $wpdb->esc_like( $search ) . '%';
+		$where_clause = ' WHERE (name LIKE %s OR phone LIKE %s)';
+		$params[] = $search_like;
+        $params[] = $search_like;
+	}
+    
+    $limit_sql = '';
+    if ( $limit_input !== -1 ) {
+        $limit_sql = 'LIMIT %d OFFSET %d';
+        $params[] = $limit;
+        $params[] = $offset;
+    }
+
+	// (Total items) (count) karein
+    $total_items = 0;
+    if ( $limit_input !== -1 ) {
+        // Prepare the count query without limit/offset params
+        $count_query_params = $params;
+        if ( $limit_sql ) {
+            // Remove limit and offset from parameters array if present (assuming they are the last two)
+            array_pop( $count_query_params );
+            array_pop( $count_query_params );
+        }
+        $total_items = $wpdb->get_var( $wpdb->prepare(
+            "SELECT COUNT(id) FROM {$tables['customers']} $where_clause",
+            $count_query_params
+        ) );
+    }
+
+	// (Customers) (fetch) karein
+	$query = $wpdb->prepare(
+		"SELECT id, name, phone, address, credit_balance FROM {$tables['customers']}
+		$where_clause
+		ORDER BY name ASC
+		$limit_sql",
+		$params
+	);
+	$customers = $wpdb->get_results( $query );
+    
+    // (Data) ko (format) karein
+    foreach ( $customers as $customer ) {
+        $customer->credit_balance_formatted = rsam_format_price( $customer->credit_balance );
+    }
+
+	wp_send_json_success( [
+		'customers'  => $customers,
+		'pagination' => ( $limit_input !== -1 ) ? [
+			'total_items' => (int) $total_items,
+			'total_pages' => ceil( $total_items / $limit_input ),
+			'current_page' => $page,
+		] : null,
+	] );
+}
+add_action( 'wp_ajax_rsam_get_customers', 'rsam_ajax_get_customers' );
+
+
+/**
+ * (AJAX) Handler: Naya (Customer) (save) ya (update) karne ke liye.
+ */
+function rsam_ajax_save_customer() {
+	// (Security) checks
+	check_ajax_referer( 'rsam-ajax-nonce', 'nonce' );
+	if ( ! current_user_can( 'rsam_manage_customers' ) && ! current_user_can( 'rsam_manage_sales' ) ) {
+		wp_send_json_error( [ 'message' => __( 'You do not have permission.', RSAM_TEXT_DOMAIN ) ], 403 );
+	}
+
+	// (POST data) (parse) karein
+	parse_str( wp_unslash( $_POST['form_data'] ), $data );
+
+	// (Validate) aur (sanitize) karein
+	$customer_id = isset( $data['customer_id'] ) ? absint( $data['customer_id'] ) : 0;
+	$name = isset( $data['name'] ) ? sanitize_text_field( $data['name'] ) : '';
+    $phone = isset( $data['phone'] ) ? sanitize_text_field( $data['phone'] ) : '';
+    $address = isset( $data['address'] ) ? sanitize_textarea_field( $data['address'] ) : '';
+
+	// (Validation)
+	if ( empty( $name ) ) {
+		wp_send_json_error( [ 'message' => __( 'Please fill the required field (Name).', RSAM_TEXT_DOMAIN ) ], 400 );
+	}
+
+	global $wpdb;
+	$tables = rsam_get_table_names();
+
+	$db_data = [
+		'name'    => $name,
+        'phone'   => $phone,
+        'address' => $address,
+	];
+    $db_formats = [ '%s', '%s', '%s' ];
+
+	// (Update) ya (Insert)
+	if ( $customer_id > 0 ) {
+		// Update
+		$result = $wpdb->update(
+			$tables['customers'],
+			$db_data,
+			[ 'id' => $customer_id ], // (WHERE)
+			$db_formats,
+			[ '%d' ] // (WHERE format)
+		);
+        $message = __( 'Customer updated successfully.', RSAM_TEXT_DOMAIN );
+	} else {
+		// Insert
+        $db_data['credit_balance'] = 0; // Naya (customer) 0 (balance) se shuru hoga
+        $db_data['created_at'] = current_time( 'mysql' );
+        $db_formats[] = '%f';
+        $db_formats[] = '%s';
+        
+		$result = $wpdb->insert(
+			$tables['customers'],
+			$db_data,
+			$db_formats
+		);
+        $customer_id = $wpdb->insert_id;
+        $message = __( 'Customer added successfully.', RSAM_TEXT_DOMAIN );
+	}
+
+	if ( $result === false ) {
+		wp_send_json_error( [ 'message' => __( 'Database error. Could not save customer.', RSAM_TEXT_DOMAIN ) ], 500 );
+	}
+
+    // (Quick Add) ke liye naya (customer object) (return) karein
+    $new_customer = $wpdb->get_row( $wpdb->prepare( "SELECT id, name, credit_balance FROM {$tables['customers']} WHERE id = %d", $customer_id ) );
+
+	wp_send_json_success( [ 
+        'message' => $message, 
+        'customer' => $new_customer // (Dropdown) ko (update) karne ke liye
+    ] );
+}
+add_action( 'wp_ajax_rsam_save_customer', 'rsam_ajax_save_customer' );
+
+
+/**
+ * (AJAX) Handler: (Customer) (delete) karne ke liye.
+ */
+function rsam_ajax_delete_customer() {
+	// (Security) checks
+	check_ajax_referer( 'rsam-ajax-nonce', 'nonce' );
+	if ( ! current_user_can( 'rsam_manage_customers' ) ) {
+		wp_send_json_error( [ 'message' => __( 'You do not have permission.', RSAM_TEXT_DOMAIN ) ], 403 );
+	}
+
+	$customer_id = isset( $_POST['customer_id'] ) ? absint( $_POST['customer_id'] ) : 0;
+	if ( $customer_id <= 0 ) {
+		wp_send_json_error( [ 'message' => __( 'Invalid Customer ID.', RSAM_TEXT_DOMAIN ) ], 400 );
+	}
+
+	global $wpdb;
+	$tables = rsam_get_table_names();
+    
+    // Check karein ke (customer) ka (balance) 0 hai
+    $balance = $wpdb->get_var( $wpdb->prepare(
+        "SELECT credit_balance FROM {$tables['customers']} WHERE id = %d",
+        $customer_id
+    ) );
+    
+    if ( (float) $balance > 0 ) {
+        wp_send_json_error( [ 'message' => __( 'Cannot delete. This customer has an outstanding balance.', RSAM_TEXT_DOMAIN ) ], 400 );
+    }
+
+    // Check karein ke (customer) (sales) se (linked) to nahi
+    $sales_count = $wpdb->get_var( $wpdb->prepare(
+        "SELECT COUNT(id) FROM {$tables['sales']} WHERE customer_id = %d",
+        $customer_id
+    ) );
+    
+    if ( $sales_count > 0 ) {
+        wp_send_json_error( [ 'message' => __( 'Cannot delete. This customer has sales history. You can hide them if needed (feature not implemented).', RSAM_TEXT_DOMAIN ) ], 400 );
+    }
+
+	$result = $wpdb->delete( $tables['customers'], [ 'id' => $customer_id ], [ '%d' ] );
+
+	if ( $result ) {
+		wp_send_json_success( [ 'message' => __( 'Customer deleted successfully.', RSAM_TEXT_DOMAIN ) ] );
+	} else {
+		wp_send_json_error( [ 'message' => __( 'Could not delete customer.', RSAM_TEXT_DOMAIN ) ], 500 );
+	}
+}
+add_action( 'wp_ajax_rsam_delete_customer', 'rsam_ajax_delete_customer' );
+
+
+/**
+ * (AJAX) Handler: (Customer) se (payment) (wasool) karna.
+ */
+function rsam_ajax_record_customer_payment() {
+	// (Security) checks
+	check_ajax_referer( 'rsam-ajax-nonce', 'nonce' );
+	if ( ! current_user_can( 'rsam_manage_customers' ) ) {
+		wp_send_json_error( [ 'message' => __( 'You do not have permission.', RSAM_TEXT_DOMAIN ) ], 403 );
+	}
+    
+    // (POST data) (parse) karein
+	parse_str( wp_unslash( $_POST['form_data'] ), $data );
+    
+    $customer_id = isset( $data['customer_id'] ) ? absint( $data['customer_id'] ) : 0;
+    $amount = isset( $data['amount'] ) ? floatval( $data['amount'] ) : 0;
+    $payment_date = isset( $data['payment_date'] ) ? sanitize_text_field( $data['payment_date'] ) : '';
+    $notes = isset( $data['notes'] ) ? sanitize_textarea_field( $data['notes'] ) : '';
+
+    if ( $customer_id <= 0 || $amount <= 0 || empty( $payment_date ) ) {
+        wp_send_json_error( [ 'message' => __( 'Invalid data. Please check amount and date.', RSAM_TEXT_DOMAIN ) ], 400 );
+    }
+
+    global $wpdb;
+	$tables = rsam_get_table_names();
+    
+    // (Transaction) shuru karein
+    $wpdb->query( 'START TRANSACTION' );
+    
+    try {
+        // 1. (Payment) ko (record) karein
+        $payment_result = $wpdb->insert(
+            $tables['customer_payments'],
+            [
+                'customer_id'  => $customer_id,
+                'payment_date' => $payment_date,
+                'amount'       => $amount,
+                'notes'        => $notes,
+                'created_at'   => current_time( 'mysql' ),
+            ],
+            [ '%d', '%s', '%f', '%s', '%s' ]
+        );
+        
+        if ( ! $payment_result ) {
+            throw new Exception( __( 'Failed to save payment record.', RSAM_TEXT_DOMAIN ) );
+        }
+        
+        // 2. (Customer) ka (balance) (update) karein (kam karein)
+        $balance_result = $wpdb->query( $wpdb->prepare(
+            "UPDATE {$tables['customers']} SET credit_balance = credit_balance - %f WHERE id = %d",
+            $amount,
+            $customer_id
+        ) );
+        
+        if ( $balance_result === false ) {
+             throw new Exception( __( 'Failed to update customer balance.', RSAM_TEXT_DOMAIN ) );
+        }
+        
+        // (Transaction) (Commit) karein
+        $wpdb->query( 'COMMIT' );
+        wp_send_json_success( [ 'message' => __( 'Payment recorded successfully. Customer balance updated.', RSAM_TEXT_DOMAIN ) ] );
+
+    } catch ( Exception $e ) {
+        // (Transaction) (Rollback) karein
+        $wpdb->query( 'ROLLBACK' );
+        wp_send_json_error( [ 'message' => $e->getMessage() ], 500 );
+    }
+}
+add_action( 'wp_ajax_rsam_record_customer_payment', 'rsam_ajax_record_customer_payment' );
+
+
+/**
+ * Part 13 — Reports (Templates + AJAX)
+ */
+
+/**
+ * Reports Screen ke liye (HTML <template>)
+ */
+function rsam_template_reports() {
+	?>
+	<template id="rsam-tmpl-reports">
+		<div class="rsam-screen-header">
+			<h1><?php esc_html_e( 'Reports', RSAM_TEXT_DOMAIN ); ?></h1>
+		</div>
+
+		<div class="rsam-card rsam-report-controls">
+            <form id="rsam-report-form" class="rsam-form">
+                <div class="rsam-form-grid-4col">
+                    <div class="rsam-form-field">
+                        <label for="rsam-report-type"><?php esc_html_e( 'Report Type', RSAM_TEXT_DOMAIN ); ?></label>
+                        <select id="rsam-report-type" name="report_type" required>
+                            <option value=""><?php esc_html_e( 'Select a report', RSAM_TEXT_DOMAIN ); ?></option>
+                            <option value="pnl"><?php esc_html_e( 'Profit & Loss Statement', RSAM_TEXT_DOMAIN ); ?></option>
+                            <option value="sales"><?php esc_html_e( 'Sales Summary', RSAM_TEXT_DOMAIN ); ?></option>
+                            <option value="expenses"><?php esc_html_e( 'Expense Breakdown', RSAM_TEXT_DOMAIN ); ?></option>
+                            <option value="stock"><?php esc_html_e( 'Inventory Valuation', RSAM_TEXT_DOMAIN ); ?></option>
+                            <option value="customer_ledger"><?php esc_html_e( 'Customer Ledger (Khata)', RSAM_TEXT_DOMAIN ); ?></option>
+                        </select>
+                    </div>
+                    <div class="rsam-form-field">
+                        <label for="rsam-report-start-date"><?php esc_html_e( 'Start Date', RSAM_TEXT_DOMAIN ); ?></label>
+                        <input type="date" id="rsam-report-start-date" name="start_date">
+                    </div>
+                    <div class="rsam-form-field">
+                        <label for="rsam-report-end-date"><?php esc_html_e( 'End Date', RSAM_TEXT_DOMAIN ); ?></label>
+                        <input type="date" id="rsam-report-end-date" name="end_date">
+                    </div>
+                    <div class="rsam-form-field" id="rsam-report-customer-field" style="display: none;">
+                        <label for="rsam-report-customer-id"><?php esc_html_e( 'Customer', RSAM_TEXT_DOMAIN ); ?></label>
+                        <select id="rsam-report-customer-id" name="customer_id" class="rsam-customer-search-select">
+                            </select>
+                    </div>
+                    <div class="rsam-form-field rsam-report-action">
+                        <button type="submit" class="button button-primary" id="rsam-generate-report">
+                            <span class="rsam-btn-text"><?php esc_html_e( 'Generate Report', RSAM_TEXT_DOMAIN ); ?></span>
+                            <span class="rsam-loader-spinner"></span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+		</div>
+
+		<div id="rsam-report-results-wrapper">
+            <div class="rsam-card rsam-report-placeholder">
+                <p><?php esc_html_e( 'Please select a report type and date range to generate a report.', RSAM_TEXT_DOMAIN ); ?></p>
+            </div>
+            </div>
+
+	</template>
+	<?php
+}
+
+/**
+ * (AJAX) Handler: (Report) (generate) karne ke liye.
+ */
+function rsam_ajax_generate_report() {
+	// (Security) checks
+	check_ajax_referer( 'rsam-ajax-nonce', 'nonce' );
+	if ( ! current_user_can( 'rsam_view_reports' ) ) {
+		wp_send_json_error( [ 'message' => __( 'You do not have permission.', RSAM_TEXT_DOMAIN ) ], 403 );
+	}
+
+    // (Inputs)
+    $report_type = isset( $_POST['report_type'] ) ? sanitize_key( $_POST['report_type'] ) : '';
+    // NOTE: Date defaults are calculated from the server's time zone setting
+    $start_date = isset( $_POST['start_date'] ) && ! empty( $_POST['start_date'] ) ? sanitize_text_field( $_POST['start_date'] ) : wp_date( 'Y-m-01' ); // (Default: Month start)
+    $end_date = isset( $_POST['end_date'] ) && ! empty( $_POST['end_date'] ) ? sanitize_text_field( $_POST['end_date'] ) : wp_date( 'Y-m-d' ); // (Default: Today)
+    $customer_id = isset( $_POST['customer_id'] ) ? absint( $_POST['customer_id'] ) : 0;
+    
+    // (Dates) ko (SQL) (format) mein (adjust) karein (time ke sath)
+    $start_datetime = $start_date . ' 00:00:00';
+    $end_datetime = $end_date . ' 23:59:59';
+    
+    global $wpdb;
+	$tables = rsam_get_table_names();
+    $data = [
+        'report_type' => $report_type,
+        'start_date'  => $start_date,
+        'end_date'    => $end_date,
+    ];
+
+    switch ( $report_type ) {
+        case 'pnl':
+            // 1. (Revenue) (Total Sales)
+            $total_sales = $wpdb->get_var( $wpdb->prepare(
+                "SELECT SUM(total_amount) FROM {$tables['sales']} WHERE sale_date BETWEEN %s AND %s",
+                $start_datetime, $end_datetime
+            ) );
+            
+            // 2. (COGS) (Cost of Goods Sold)
+            $total_cogs = $wpdb->get_var( $wpdb->prepare(
+                "SELECT SUM(total_cost) FROM {$tables['sales']} WHERE sale_date BETWEEN %s AND %s",
+                $start_datetime, $end_datetime
+            ) );
+            
+            // 3. (Expenses)
+            $total_expenses = $wpdb->get_var( $wpdb->prepare(
+                "SELECT SUM(amount) FROM {$tables['expenses']} WHERE expense_date BETWEEN %s AND %s",
+                $start_date, $end_date // (Expense date) (column) (DATE) hai
+            ) );
+            
+            // 4. (Expense Breakdown)
+            $expense_breakdown = $wpdb->get_results( $wpdb->prepare(
+                "SELECT category, SUM(amount) as total 
+                 FROM {$tables['expenses']} 
+                 WHERE expense_date BETWEEN %s AND %s 
+                 GROUP BY category",
+                $start_date, $end_date
+            ) );
+            
+            $gross_profit = (float) $total_sales - (float) $total_cogs;
+            $net_profit = $gross_profit - (float) $total_expenses;
+
+            $data['pnl'] = [
+                'total_sales'    => (float) $total_sales,
+                'total_cogs'     => (float) $total_cogs,
+                'gross_profit'   => $gross_profit,
+                'total_expenses' => (float) $total_expenses,
+                'net_profit'     => $net_profit,
+                'expense_breakdown' => $expense_breakdown,
+            ];
+            break;
+            
+        case 'sales':
+            // (Sales Summary)
+            $sales_summary = $wpdb->get_row( $wpdb->prepare(
+                "SELECT 
+                    SUM(total_amount) as total_sales,
+                    SUM(total_profit) as total_profit,
+                    SUM(discount_amount) as total_discount,
+                    COUNT(id) as total_transactions
+                 FROM {$tables['sales']} 
+                 WHERE sale_date BETWEEN %s AND %s",
+                $start_datetime, $end_datetime
+            ), ARRAY_A );
+            
+            // (Top Selling Products)
+            $top_products = $wpdb->get_results( $wpdb->prepare(
+                "SELECT 
+                    p.name, 
+                    p.unit_type,
+                    SUM(si.quantity) as total_quantity,
+                    SUM(si.quantity * si.selling_price) as total_revenue
+                 FROM {$tables['sale_items']} si
+                 JOIN {$tables['sales']} s ON s.id = si.sale_id
+                 JOIN {$tables['products']} p ON p.id = si.product_id
+                 WHERE s.sale_date BETWEEN %s AND %s
+                 GROUP BY si.product_id
+                 ORDER BY total_revenue DESC
+                 LIMIT 10",
+                 $start_datetime, $end_datetime
+            ) );
+            
+            $data['sales_summary'] = $sales_summary;
+            $data['top_products'] = $top_products;
+            break;
+            
+        case 'expenses':
+            // (Expense Breakdown)
+            $total_expenses = $wpdb->get_var( $wpdb->prepare(
+                "SELECT SUM(amount) FROM {$tables['expenses']} WHERE expense_date BETWEEN %s AND %s",
+                $start_date, $end_date
+            ) );
+            
+            $expense_breakdown = $wpdb->get_results( $wpdb->prepare(
+                "SELECT category, SUM(amount) as total 
+                 FROM {$tables['expenses']} 
+                 WHERE expense_date BETWEEN %s AND %s 
+                 GROUP BY category
+                 ORDER BY total DESC",
+                $start_date, $end_date
+            ) );
+            
+            $data['expenses_summary'] = [
+                'total_expenses' => (float) $total_expenses,
+                'expense_breakdown' => $expense_breakdown,
+            ];
+            break;
+            
+        case 'stock':
+            // (Inventory Valuation Report)
+            
+            // (Total Stock Value) (Cost Price par)
+            $stock_value = $wpdb->get_var(
+                "SELECT SUM(cost_price * quantity_in_stock) 
+                 FROM {$tables['product_batches']} 
+                 WHERE quantity_in_stock > 0"
+            );
+            
+            // (Stock Value by Category)
+            $value_by_category = $wpdb->get_results(
+                "SELECT 
+                    p.category, 
+                    SUM(b.cost_price * b.quantity_in_stock) as total_cost_value
+                 FROM {$tables['product_batches']} b
+                 JOIN {$tables['products']} p ON p.id = b.product_id
+                 WHERE b.quantity_in_stock > 0
+                 GROUP BY p.category
+                 ORDER BY total_cost_value DESC"
+            );
+            
+            // (Low Stock Items)
+            $low_stock_products = $wpdb->get_results(
+                "SELECT name, stock_quantity, low_stock_threshold 
+                 FROM {$tables['products']} 
+                 WHERE stock_quantity <= low_stock_threshold AND low_stock_threshold > 0
+                 ORDER BY (stock_quantity - low_stock_threshold) ASC"
+            );
+            
+            $data['stock_summary'] = [
+                'total_stock_value' => (float) $stock_value,
+                'value_by_category' => $value_by_category,
+                'low_stock_products' => $low_stock_products,
+            ];
+            break;
+            
+        case 'customer_ledger':
+            if ( $customer_id <= 0 ) {
+                wp_send_json_error( [ 'message' => __( 'Please select a customer.', RSAM_TEXT_DOMAIN ) ], 400 );
+            }
+            
+            $customer = $wpdb->get_row( $wpdb->prepare( "SELECT id, name, phone, credit_balance FROM {$tables['customers']} WHERE id = %d", $customer_id ) );
+            
+            // (Sales) - Debit (Dues Added)
+            $sales_query = $wpdb->prepare(
+                "SELECT id, sale_date as date, total_amount as debit, 0 as credit, 'Sale' as type, notes
+                 FROM {$tables['sales']} 
+                 WHERE customer_id = %d AND payment_status = 'unpaid' 
+                 AND sale_date BETWEEN %s AND %s",
+                $customer_id, $start_datetime, $end_datetime
+            );
+            
+            // (Payments) - Credit (Payment Received)
+            $payments_query = $wpdb->prepare(
+                "SELECT id, payment_date as date, 0 as debit, amount as credit, 'Payment' as type, notes
+                 FROM {$tables['customer_payments']} 
+                 WHERE customer_id = %d
+                 AND payment_date BETWEEN %s AND %s",
+                 $customer_id, $start_date, $end_date
+            );
+            
+            $ledger_entries = $wpdb->get_results( "$sales_query UNION ALL $payments_query ORDER BY date ASC" );
+            
+            $data['customer_ledger'] = [
+                'customer' => $customer,
+                'entries'  => $ledger_entries,
+            ];
+            break;
+
+        default:
+             wp_send_json_error( [ 'message' => __( 'Invalid report type selected.', RSAM_TEXT_DOMAIN ) ], 400 );
+    }
+
+	wp_send_json_success( $data );
+}
+add_action( 'wp_ajax_rsam_generate_report', 'rsam_ajax_generate_report' );
+
+
+/**
+ * Part 14 — Settings (Templates + AJAX)
+ */
+
+/**
+ * Settings Screen ke liye (HTML <template>)
+ */
+function rsam_template_settings() {
+	?>
+	<template id="rsam-tmpl-settings">
+		<div class="rsam-screen-header">
+			<h1><?php esc_html_e( 'Settings', RSAM_TEXT_DOMAIN ); ?></h1>
+		</div>
+
+		<div class="rsam-card rsam-settings-form-wrapper">
+            <form id="rsam-settings-form" class="rsam-form">
+                
+                <div id="rsam-settings-loader" style="display: none;">
+                    <p class="rsam-list-loading">
+                        <span class="rsam-loader-spinner"></span> <?php esc_html_e( 'Loading settings...', RSAM_TEXT_DOMAIN ); ?>
+                    </p>
+                </div>
+
+                <div id="rsam-settings-fields" style="display: none;">
+                    <h3><?php esc_html_e( 'Shop Details', RSAM_TEXT_DOMAIN ); ?></h3>
+                    <div class="rsam-form-grid">
+                        <div class="rsam-form-field">
+                            <label for="rsam-setting-shop-name"><?php esc_html_e( 'Shop Name', RSAM_TEXT_DOMAIN ); ?></label>
+                            <input type="text" id="rsam-setting-shop-name" name="shop_name" placeholder="<?php esc_attr_e( 'My Grocery Store', RSAM_TEXT_DOMAIN ); ?>">
+                        </div>
+                        <div class="rsam-form-field">
+                            <label for="rsam-setting-currency-symbol"><?php esc_html_e( 'Currency Symbol', RSAM_TEXT_DOMAIN ); ?></label>
+                            <input type="text" id="rsam-setting-currency-symbol" name="currency_symbol" value="<?php esc_attr_e( 'Rs.', RSAM_TEXT_DOMAIN ); ?>">
+                            <p class="rsam-form-note"><?php esc_html_e( 'This symbol is used for price display everywhere.', RSAM_TEXT_DOMAIN ); ?></p>
+                        </div>
+                    </div>
+                    
+                    <hr>
+
+                    <h3><?php esc_html_e( 'Inventory Settings', RSAM_TEXT_DOMAIN ); ?></h3>
+                    <div class="rsam-form-field">
+                        <label>
+                            <input type="checkbox" name="enable_low_stock_alerts" id="rsam-setting-low-stock" value="1">
+                            <?php esc_html_e( 'Enable Low Stock Alerts on Dashboard', RSAM_TEXT_DOMAIN ); ?>
+                        </label>
+                    </div>
+
+                    <hr>
+                    
+                    <h3><?php esc_html_e( 'Tax Settings (Optional)', RSAM_TEXT_DOMAIN ); ?></h3>
+                     <div class="rsam-form-field">
+                        <label>
+                            <input type="checkbox" name="enable_gst" id="rsam-setting-enable-gst" value="1" disabled>
+                            <?php esc_html_e( 'Enable GST/VAT (Feature not yet implemented)', RSAM_TEXT_DOMAIN ); ?>
+                        </label>
+                    </div>
+
+                    <div class="rsam-form-actions">
+                        <button type="submit" class="button button-primary" id="rsam-save-settings-form">
+                            <span class="rsam-btn-text"><?php esc_html_e( 'Save Settings', RSAM_TEXT_DOMAIN ); ?></span>
+                            <span class="rsam-loader-spinner"></span>
+                        </button>
+                    </div>
+                </div>
+
+            </form>
+		</div>
+
+	</template>
+	<?php
+}
+
+/**
+ * (AJAX) Handler: (Settings) (get) karne ke liye.
+ * (Settings) (WordPress options table) mein (save) ki jayengi.
+ */
+function rsam_ajax_get_settings() {
+	// (Security) checks
+	check_ajax_referer( 'rsam-ajax-nonce', 'nonce' );
+	if ( ! current_user_can( 'rsam_manage_settings' ) ) {
+		wp_send_json_error( [ 'message' => __( 'You do not have permission.', RSAM_TEXT_DOMAIN ) ], 403 );
+	}
+
+    // (Default) (settings)
+    $defaults = [
+        'shop_name' => get_bloginfo( 'name' ) . ' ' . __( 'Store', RSAM_TEXT_DOMAIN ),
+        'currency_symbol' => __( 'Rs.', RSAM_TEXT_DOMAIN ),
+        'enable_low_stock_alerts' => '1',
+        'enable_gst' => '0',
+    ];
+
+    // (Database) se (settings) (load) karein
+    $settings = get_option( 'rsam_settings', $defaults );
+    // (Defaults) ke sath (merge) karein taake naye (options) bhi shamil ho jayein
+    $settings = wp_parse_args( $settings, $defaults );
+
+	wp_send_json_success( $settings );
+}
+add_action( 'wp_ajax_rsam_get_settings', 'rsam_ajax_get_settings' );
+
+
+/**
+ * (AJAX) Handler: (Settings) (save) karne ke liye.
+ */
+function rsam_ajax_save_settings() {
+	// (Security) checks
+	check_ajax_referer( 'rsam-ajax-nonce', 'nonce' );
+	if ( ! current_user_can( 'rsam_manage_settings' ) ) {
+		wp_send_json_error( [ 'message' => __( 'You do not have permission.', RSAM_TEXT_DOMAIN ) ], 403 );
+	}
+
+	// (POST data) (parse) karein
+	parse_str( wp_unslash( $_POST['form_data'] ), $data );
+
+    // (Current settings) (load) karein
+    $settings = get_option( 'rsam_settings', [] );
+
+    // (Data) ko (Sanitize) aur (Update) karein
+    if ( isset( $data['shop_name'] ) ) {
+        $settings['shop_name'] = sanitize_text_field( $data['shop_name'] );
+    }
+    if ( isset( $data['currency_symbol'] ) ) {
+        $settings['currency_symbol'] = sanitize_text_field( $data['currency_symbol'] );
+    }
+    
+    // (Checkboxes)
+    $settings['enable_low_stock_alerts'] = isset( $data['enable_low_stock_alerts'] ) ? '1' : '0';
+    // $settings['enable_gst'] = isset( $data['enable_gst'] ) ? '1' : '0'; // (Abhi (disabled) hai)
+
+	// (Database) mein (update) karein
+    update_option( 'rsam_settings', $settings );
+
+	wp_send_json_success( [ 'message' => __( 'Settings saved successfully.', RSAM_TEXT_DOMAIN ) ] );
+}
+add_action( 'wp_ajax_rsam_save_settings', 'rsam_ajax_save_settings' );
+
+/**
+ * ===================================================================
+ * === PHASE 1 (PHP) MUKAMMAL HUA (COMPLETED) ===
+ * ===================================================================
+ * NOTE: The closing PHP tag '?>' is intentionally omitted to prevent 
+ * "headers already sent" errors due to trailing whitespace.
+ */
