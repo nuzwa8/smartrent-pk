@@ -1,1 +1,1 @@
-# Shop-accounting-system-
+# Parlor Management System
