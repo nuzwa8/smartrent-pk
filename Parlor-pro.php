@@ -538,3 +538,103 @@ function on_uninstall() : void {
 */
 
 // ----- End of Phase-1 (PHP) -----
+
+
+/** 
+ * Part 4 — Demo Data Seeder 
+ * File: parlor-pro.php
+ * Location: فائل کے آخر میں پیسٹ کریں (?> سے پہلے)
+ */
+
+add_action('admin_post_pp_seed_demo', function () {
+    if ( ! current_user_can('pp_manage_all') ) {
+        wp_die(__('آپ کے پاس اجازت نہیں', 'parlor-pro'));
+    }
+    check_admin_referer('pp_seed_demo');
+
+    global $wpdb;
+    $t = table_names();
+
+    // Demo Clients
+    $clients = [
+        ['name'=>'علی رضا','phone'=>'03001112222','email'=>'ali@example.com'],
+        ['name'=>'سارہ خان','phone'=>'03002223333','email'=>'sara@example.com'],
+        ['name'=>'حسن جاوید','phone'=>'03003334444','email'=>'hassan@example.com'],
+        ['name'=>'ایمن فاطمہ','phone'=>'03004445555','email'=>'aymen@example.com'],
+        ['name'=>'نعیم صدیقی','phone'=>'03005556666','email'=>'naeem@example.com'],
+    ];
+    foreach ($clients as $c) {
+        $exists = $wpdb->get_var($wpdb->prepare("SELECT id FROM {$t['clients']} WHERE phone=%s", $c['phone']));
+        if (! $exists) { $wpdb->insert($t['clients'], $c); }
+    }
+
+    // Demo Services
+    $services = [
+        ['title'=>'ہیئر کٹ','price'=>500,'duration'=>30],
+        ['title'=>'فیشل','price'=>1200,'duration'=>60],
+        ['title'=>'بلیچ','price'=>800,'duration'=>45],
+        ['title'=>'مینیکیور','price'=>700,'duration'=>40],
+    ];
+    foreach ($services as $s) {
+        $exists = $wpdb->get_var($wpdb->prepare("SELECT id FROM {$t['services']} WHERE title=%s", $s['title']));
+        if (! $exists) { $wpdb->insert($t['services'], $s); }
+    }
+
+    // Demo Appointment
+    $client_id  = (int) $wpdb->get_var("SELECT id FROM {$t['clients']} LIMIT 1");
+    $service_id = (int) $wpdb->get_var("SELECT id FROM {$t['services']} LIMIT 1");
+    if ($client_id && $service_id) {
+        $exists = $wpdb->get_var("SELECT id FROM {$t['appointments']} LIMIT 1");
+        if (! $exists) {
+            $now = current_time('mysql');
+            $end = date('Y-m-d H:i:s', strtotime('+1 hour', strtotime($now)));
+            $wpdb->insert($t['appointments'], [
+                'client_id'=>$client_id,
+                'service_id'=>$service_id,
+                'staff_id'=>1,
+                'start_time'=>$now,
+                'end_time'=>$end,
+                'status'=>'confirmed',
+                'notes'=>'ڈیمو اپائنٹمنٹ',
+            ]);
+        }
+    }
+
+    // Demo Order
+    $appt_id = (int) $wpdb->get_var("SELECT id FROM {$t['appointments']} LIMIT 1");
+    if ($appt_id) {
+        $exists = $wpdb->get_var($wpdb->prepare("SELECT id FROM {$t['orders']} WHERE appointment_id=%d", $appt_id));
+        if (! $exists) {
+            $wpdb->insert($t['orders'], [
+                'appointment_id'=>$appt_id,
+                'total'=>500,
+                'payment_method'=>'cash',
+                'status'=>'paid',
+            ]);
+        }
+    }
+
+    wp_redirect(admin_url('admin.php?page=parlor-pro&seed=done'));
+    exit;
+});
+
+/**
+ * Admin notice & seed button
+ */
+add_action('admin_notices', function () {
+    if ( ! current_user_can('pp_manage_all') ) { return; }
+    $screen = get_current_screen();
+    if ( empty($screen) || strpos($screen->id, SLUG) === false ) { return; }
+
+    $url = wp_nonce_url(admin_url('admin-post.php?action=pp_seed_demo'), 'pp_seed_demo');
+    echo '<div class="notice notice-success"><p>';
+    echo esc_html__('ڈیمو ڈیٹا شامل کرنے کے لیے نیچے بٹن دبائیں:', 'parlor-pro') . ' ';
+    echo '<a href="' . esc_url($url) . '" class="button button-primary">' . esc_html__('Seed Demo Data', 'parlor-pro') . '</a>';
+    echo '</p></div>';
+
+    if ( isset($_GET['seed']) && $_GET['seed'] === 'done' ) {
+        echo '<div class="notice notice-success is-dismissible"><p>' .
+             esc_html__('ڈیمو ڈیٹا بن چکا ہے ✅', 'parlor-pro') . '</p></div>';
+    }
+});
+
