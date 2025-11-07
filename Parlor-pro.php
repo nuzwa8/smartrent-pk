@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Parlor Pro
  * Description: (appointment management) + (POS) سسٹم برائے (salon/spa/barbershop) — (admin menus), (AJAX), (dbDelta), (roles), (enqueue), (templates)، سب ایک ہی (PHP) فائل میں۔
- * Version: 1.0.0
+ * Version: 1.0.4
  * Author: Parlor Pro Team
  * Text Domain: parlor-pro
  */
@@ -639,277 +639,32 @@ add_action('admin_notices', function () {
 });
 
 
-/** 
- * ===============================================
- * Parlor Pro — Services Catalog (Additive Module)
- * Added: 2025-11-07
- * NOTE: موجودہ فنکشنز میں کوئی تبدیلی نہیں کی گئی۔
- * یہ سیکشن صرف نئے فنکشنز/ہُکس ایڈ کرتا ہے تاکہ سروس کیٹیگریز/آئٹمز
- * کو بطور (option) محفوظ کریں اور AJAX کے ذریعے فراہم کریں۔
- * ===============================================
- */
-
-// اگر پہلے سے define نہیں تو namespace جاری رکھیں
-namespace ParlorPro\SSM;
-
-/** سروسز کی ڈیفالٹ کیٹلاگ (static) */
-function pp_services_default_catalog() : array {
-    return {
-  "balon_ki_khidmaat": {
-    "title": "بالوں کی خدمات (Hair Services)",
-    "items": [
-      {
-        "name": "سادہ بال کٹوانا (Simple Cut)",
-        "code": "HR_SIMPLE_CUT"
-      },
-      {
-        "name": "پرتوں والا کٹ (Layered Cut)",
-        "code": "HR_LAYERED_CUT"
-      },
-      {
-        "name": "باب کٹ (Bob Cut)",
-        "code": "HR_BOB_CUT"
-      },
-      {
-        "name": "بچوں کا ہیئر کٹ (Kids' Haircut)",
-        "code": "HR_KIDS_CUT"
-      },
-      {
-        "name": "بلو ڈرائی (Blow Dry)",
-        "code": "HR_BLOW_DRY"
-      },
-      {
-        "name": "ہیئر اسٹائلنگ (Iron/Curl/Updo)",
-        "code": "HR_STYLING"
-      },
-      {
-        "name": "روٹ ٹچ اپ (Root Touch-up)",
-        "code": "CLR_ROOT_TOUCH"
-      },
-      {
-        "name": "مکمل بالوں کا رنگ (Full Hair Color)",
-        "code": "CLR_FULL"
-      },
-      {
-        "name": "ہائی لائٹس / لو لائٹس",
-        "code": "CLR_HIGHLIGHTS"
-      },
-      {
-        "name": "بالیاج / اومبرے",
-        "code": "CLR_BALAYAGE"
-      },
-      {
-        "name": "فیشن کلرز (Fashion Colors)",
-        "code": "CLR_FASHION"
-      },
-      {
-        "name": "کیروٹین ٹریٹمنٹ",
-        "code": "TR_KERATIN"
-      },
-      {
-        "name": "پروٹین ٹریٹمنٹ",
-        "code": "TR_PROTEIN"
-      },
-      {
-        "name": "ہاٹ آئل مساج",
-        "code": "TR_HOT_OIL"
-      },
-      {
-        "name": "ڈینڈرف کا علاج",
-        "code": "TR_DANDRUFF"
-      },
-      {
-        "name": "ہیئر ایکسٹینشنز",
-        "code": "TR_EXTENSIONS"
-      },
-      {
-        "name": "ریبانڈنگ / اسٹریٹننگ",
-        "code": "TR_REBONDING"
-      }
-    ]
-  },
-  "skin_facials": {
-    "title": "جلد کی دیکھ بھال (Skin Care / Facials)",
-    "items": [
-      {
-        "name": "ایکسپریس فیشل",
-        "code": "FC_EXPRESS"
-      },
-      {
-        "name": "ڈیپ کلینزنگ فیشل",
-        "code": "FC_DEEP_CLEAN"
-      },
-      {
-        "name": "ہائیڈرا فیشل",
-        "code": "FC_HYDRA"
-      },
-      {
-        "name": "اینٹی ایجنگ فیشل",
-        "code": "FC_ANTI_AGE"
-      },
-      {
-        "name": "برائٹننگ فیشل",
-        "code": "FC_BRIGHTENING"
-      },
-      {
-        "name": "ایکنی فیشل",
-        "code": "FC_ACNE"
-      },
-      {
-        "name": "مائیکروڈرمابریژن",
-        "code": "SK_MICRODERM"
-      },
-      {
-        "name": "کیمیکل پیلز",
-        "code": "SK_CHEM_PEEL"
-      },
-      {
-        "name": "جلد کی پالش",
-        "code": "SK_POLISH"
-      },
-      {
-        "name": "بلیچ (چہرہ/جسم)",
-        "code": "SK_BLEACH"
-      }
-    ]
-  },
-  "makeup": {
-    "title": "میک اپ (Make-up Artistry)",
-    "items": [
-      {
-        "name": "پارٹی میک اپ",
-        "code": "MU_PARTY"
-      },
-      {
-        "name": "مہندی میک اپ",
-        "code": "MU_MEHNDI"
-      },
-      {
-        "name": "بارات میک اپ",
-        "code": "MU_BARAAT"
-      },
-      {
-        "name": "ولیمہ میک اپ",
-        "code": "MU_WALIMA"
-      },
-      {
-        "name": "رجسٹریشن/نکاح میک اپ",
-        "code": "MU_NIKAH"
-      },
-      {
-        "name": "ماڈل/شوٹ میک اپ",
-        "code": "MU_MODEL"
-      }
-    ]
-  },
-  "hands_feet": {
-    "title": "ہاتھوں اور پیروں کی خدمات (Hands & Feet)",
-    "items": [
-      {
-        "name": "مینی کیور",
-        "code": "HN_MANICURE"
-      },
-      {
-        "name": "پیڈی کیور",
-        "code": "HN_PEDICURE"
-      },
-      {
-        "name": "نیل پالش",
-        "code": "HN_NAIL_POLISH"
-      },
-      {
-        "name": "فرنچ مینی/پیڈی",
-        "code": "HN_FRENCH"
-      },
-      {
-        "name": "نیل آرٹ",
-        "code": "HN_NAIL_ART"
-      },
-      {
-        "name": "ایکریلک/جیل ایکسٹینشنز",
-        "code": "HN_EXTENSIONS"
-      }
-    ]
-  },
-  "hair_removal": {
-    "title": "بالوں کو ہٹانا (Hair Removal)",
-    "items": [
-      {
-        "name": "تھریڈنگ — ابرو/اپر لپس/ٹھوڑی/فل فیس",
-        "code": "HRM_THREADING"
-      },
-      {
-        "name": "فل باڈی ویکس",
-        "code": "HRM_FULL_WAX"
-      },
-      {
-        "name": "ریکا ویکس (حساس جلد)",
-        "code": "HRM_RICA_WAX"
-      }
-    ]
-  },
-  "body_massage": {
-    "title": "جسمانی علاج اور مساج (Body Treatments & Massage)",
-    "items": [
-      {
-        "name": "باڈی اسکرب/پالشنگ",
-        "code": "BD_SCRUB"
-      },
-      {
-        "name": "بیک مساج",
-        "code": "BD_BACK_MASSAGE"
-      },
-      {
-        "name": "فل باڈی مساج",
-        "code": "BD_FULL_BODY"
-      }
-    ]
-  },
-  "bridal_packages": {
-    "title": "دلہن کے پیکیجز (Bridal Packages)",
-    "items": [
-      {
-        "name": "کسٹم bridal پیکیج (میک اپ، ہیئر، فیشل، ویکسنگ، مینی/پیڈی)",
-        "code": "BR_CUSTOM_PACKAGE"
-      }
-    ]
-  }
-};
+/** Parlor Pro — Services Catalog (Additive, fixed) — 2025-11-07 */
+if (!defined('PARLOR_PRO_SERVICES_ADDON')) {
+  define('PARLOR_PRO_SERVICES_ADDON', '1.0.3');
+  function pp_services_default_catalog() : array { return json_decode('{"balon_ki_khidmaat": {"title": "بالوں کی خدمات (Hair Services)", "items": [{"name": "سادہ بال کٹوانا (Simple Cut)", "code": "HR_SIMPLE_CUT"}, {"name": "پرتوں والا کٹ (Layered Cut)", "code": "HR_LAYERED_CUT"}, {"name": "باب کٹ (Bob Cut)", "code": "HR_BOB_CUT"}, {"name": "بچوں کا ہیئر کٹ (Kids\' Haircut)", "code": "HR_KIDS_CUT"}, {"name": "بلو ڈرائی (Blow Dry)", "code": "HR_BLOW_DRY"}, {"name": "ہیئر اسٹائلنگ (Iron/Curl/Updo)", "code": "HR_STYLING"}, {"name": "روٹ ٹچ اپ (Root Touch-up)", "code": "CLR_ROOT_TOUCH"}, {"name": "مکمل بالوں کا رنگ (Full Hair Color)", "code": "CLR_FULL"}, {"name": "ہائی لائٹس / لو لائٹس", "code": "CLR_HIGHLIGHTS"}, {"name": "بالیاج / اومبرے", "code": "CLR_BALAYAGE"}, {"name": "فیشن کلرز (Fashion Colors)", "code": "CLR_FASHION"}, {"name": "کیروٹین ٹریٹمنٹ", "code": "TR_KERATIN"}, {"name": "پروٹین ٹریٹمنٹ", "code": "TR_PROTEIN"}, {"name": "ہاٹ آئل مساج", "code": "TR_HOT_OIL"}, {"name": "ڈینڈرف کا علاج", "code": "TR_DANDRUFF"}, {"name": "ہیئر ایکسٹینشنز", "code": "TR_EXTENSIONS"}, {"name": "ریبانڈنگ / اسٹریٹننگ", "code": "TR_REBONDING"}]}, "skin_facials": {"title": "جلد کی دیکھ بھال (Skin Care / Facials)", "items": [{"name": "ایکسپریس فیشل", "code": "FC_EXPRESS"}, {"name": "ڈیپ کلینزنگ فیشل", "code": "FC_DEEP_CLEAN"}, {"name": "ہائیڈرا فیشل", "code": "FC_HYDRA"}, {"name": "اینٹی ایجنگ فیشل", "code": "FC_ANTI_AGE"}, {"name": "برائٹننگ فیشل", "code": "FC_BRIGHTENING"}, {"name": "ایکنی فیشل", "code": "FC_ACNE"}, {"name": "مائیکروڈرمابریژن", "code": "SK_MICRODERM"}, {"name": "کیمیکل پیلز", "code": "SK_CHEM_PEEL"}, {"name": "جلد کی پالش", "code": "SK_POLISH"}, {"name": "بلیچ (چہرہ/جسم)", "code": "SK_BLEACH"}]}, "makeup": {"title": "میک اپ (Make-up Artistry)", "items": [{"name": "پارٹی میک اپ", "code": "MU_PARTY"}, {"name": "مہندی میک اپ", "code": "MU_MEHNDI"}, {"name": "بارات میک اپ", "code": "MU_BARAAT"}, {"name": "ولیمہ میک اپ", "code": "MU_WALIMA"}, {"name": "رجسٹریشن/نکاح میک اپ", "code": "MU_NIKAH"}, {"name": "ماڈل/شوٹ میک اپ", "code": "MU_MODEL"}]}, "hands_feet": {"title": "ہاتھوں اور پیروں کی خدمات (Hands & Feet)", "items": [{"name": "مینی کیور", "code": "HN_MANICURE"}, {"name": "پیڈی کیور", "code": "HN_PEDICURE"}, {"name": "نیل پالش", "code": "HN_NAIL_POLISH"}, {"name": "فرنچ مینی/پیڈی", "code": "HN_FRENCH"}, {"name": "نیل آرٹ", "code": "HN_NAIL_ART"}, {"name": "ایکریلک/جیل ایکسٹینشنز", "code": "HN_EXTENSIONS"}]}, "hair_removal": {"title": "بالوں کو ہٹانا (Hair Removal)", "items": [{"name": "تھریڈنگ — ابرو/اپر لپس/ٹھوڑی/فل فیس", "code": "HRM_THREADING"}, {"name": "فل باڈی ویکس", "code": "HRM_FULL_WAX"}, {"name": "ریکا ویکس (حساس جلد)", "code": "HRM_RICA_WAX"}]}, "body_massage": {"title": "جسمانی علاج اور مساج (Body Treatments & Massage)", "items": [{"name": "باڈی اسکرب/پالشنگ", "code": "BD_SCRUB"}, {"name": "بیک مساج", "code": "BD_BACK_MASSAGE"}, {"name": "فل باڈی مساج", "code": "BD_FULL_BODY"}]}, "bridal_packages": {"title": "دلہن کے پیکیجز (Bridal Packages)", "items": [{"name": "کسٹم bridal پیکیج (میک اپ، ہیئر، فیشل، ویکسنگ، مینی/پیڈی)", "code": "BR_CUSTOM_PACKAGE"}]}}', true); }
+  if (!defined('OPT_SERVICES_CATALOG')) define('OPT_SERVICES_CATALOG','pp_services_catalog');
+  \add_action('init', function(){ if (!\get_option(OPT_SERVICES_CATALOG)) { \add_option(OPT_SERVICES_CATALOG, \wp_json_encode(pp_services_default_catalog())); } });
+  \add_action('wp_ajax_pp_get_services_catalog', function(){ if (!\current_user_can('read')) { \wp_send_json_error(['message'=>'unauthorized'], 403); } $json = \get_option(OPT_SERVICES_CATALOG); if (empty($json)) { $json = \wp_json_encode(pp_services_default_catalog()); } \wp_send_json_success(['catalog' => json_decode($json, true)]); });
+  \add_action('wp_ajax_pp_set_services_catalog', function(){ if (!\current_user_can('manage_options')) { \wp_send_json_error(['message'=>'unauthorized'], 403); } $raw = isset($_POST['catalog']) ? \wp_unslash($_POST['catalog']) : ''; $data = json_decode($raw, true); if (!is_array($data)) { \wp_send_json_error(['message'=>'invalid_payload'], 400); } \update_option(OPT_SERVICES_CATALOG, \wp_json_encode($data)); \wp_send_json_success(['updated'=>true]); });
 }
 
-/** آپشن کلید */
-const OPT_SERVICES_CATALOG = 'pp_services_catalog';
 
-/** پہلی لوڈ پر (option) ensure */
-add_action('plugins_loaded', function() {
-    if (! get_option(OPT_SERVICES_CATALOG)) {
-        add_option(OPT_SERVICES_CATALOG, wp_json_encode(pp_services_default_catalog()));
-    }
-});
 
-/** AJAX: کیٹلاگ واپس کریں (admin + staff) */
-add_action('wp_ajax_pp_get_services_catalog', function() {
-    // موجودہ کوڈ اسٹائل کے مطابق ہلکی چیک
-    if (! current_user_can('read')) {
-        wp_send_json_error(['message'=>'unauthorized'], 403);
-    }
-    $json = get_option(OPT_SERVICES_CATALOG);
-    if (empty($json)) {
-        $json = wp_json_encode(pp_services_default_catalog());
-    }
-    wp_send_json_success(['catalog' => json_decode($json, true)]);
-});
 
-/** AJAX: کیٹلاگ اپڈیٹ کریں (اختیاری) — صرف manage_options */
-add_action('wp_ajax_pp_set_services_catalog', function() {
-    if (! current_user_can('manage_options')) {
-        wp_send_json_error(['message'=>'unauthorized'], 403);
-    }
-    $raw = isset($_POST['catalog']) ? wp_unslash($_POST['catalog']) : '';
-    $data = json_decode($raw, true);
-    if (! is_array($data)) {
-        wp_send_json_error(['message'=>'invalid_payload'], 400);
-    }
-    update_option(OPT_SERVICES_CATALOG, wp_json_encode($data));
-    wp_send_json_success(['updated'=>true]);
-});
+/** Additive: Services submenu + screen (Added 2025-11-07) */
+add_action('admin_menu', function() {
+    $cap = current_user_can('pp_manage_all') ? 'pp_manage_all' : 'pp_calendar';
+    $hook_services = add_submenu_page(
+        SLUG,
+        __('Services', TEXT_DOMAIN),
+        __('Services', TEXT_DOMAIN),
+        $cap,
+        SLUG . '-services',
+        __NAMESPACE__ . '\\screen_services'
+    );
+    add_action("load-$hook_services", __NAMESPACE__ . '\\ensure_assets');
+}, 20);
+
+/** Additive: screen callback for Services */
+function screen_services() { echo '<div class="wrap"><h1>' . esc_html__('Services', TEXT_DOMAIN) . '</h1>'; render_template('admin-services.php'); echo '</div>'; }
