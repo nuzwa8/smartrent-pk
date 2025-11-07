@@ -1,348 +1,549 @@
-/**
- * Parlor Pro — Admin Styles
- * Namespace: .ssm
- * (Glassmorphism + Gradients + Responsive Layout)
- */
+(() => {
+  'use strict';
+  /**
+   * Parlor Pro — Admin App
+   * (IIFE) — utilities, screen inits, (AJAX), loaders, tables/forms, pagination
+   */
 
-/* ------------------------------
-   Design Tokens
---------------------------------*/
-:root {
-  --ssm-primary: #7a3cff;
-  --ssm-cyan: #00d4ff;
-  --ssm-coral: #ff6b6b;
-  --ssm-bg: #f8fafc;
-  --ssm-text: #0f172a;
-  --ssm-muted: #64748b;
-  --ssm-radius: 1rem;
-  --ssm-gap: 1rem;
-  --ssm-grad-1: linear-gradient(135deg,#7A3CFF 0%,#00D4FF 100%);
-  --ssm-grad-2: linear-gradient(135deg,#FF6B6B 0%,#FFC46B 100%);
-  --ssm-shadow: 0 8px 24px rgba(0,0,0,0.08);
-}
-
-/* ------------------------------
-   Base Elements
---------------------------------*/
-.ssm {
-  font-family: "Segoe UI", system-ui, sans-serif;
-  color: var(--ssm-text);
-  box-sizing: border-box;
-}
-
-.ssm * {
-  box-sizing: inherit;
-}
-
-.ssm h1, .ssm h2, .ssm h3, .ssm h4 {
-  color: var(--ssm-text);
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-}
-
-.ssm .muted {
-  color: var(--ssm-muted);
-  font-size: 0.9em;
-}
-
-/* ------------------------------
-   Layouts
---------------------------------*/
-.ssm.wrap, .ssm-root {
-  display: block;
-  background: var(--ssm-bg);
-  padding: var(--ssm-gap);
-}
-
-.ssm.grid {
-  display: grid;
-  gap: var(--ssm-gap);
-}
-
-.ssm.grid.two {
-  grid-template-columns: repeat(auto-fit,minmax(300px,1fr));
-}
-
-.ssm.grid.kpis {
-  grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
-}
-
-/* ------------------------------
-   Header Bars
---------------------------------*/
-.ssm.header {
-  padding: 1rem 1.5rem;
-  border-radius: var(--ssm-radius);
-  color: #fff;
-  box-shadow: var(--ssm-shadow);
-  margin-bottom: var(--ssm-gap);
-}
-
-.ssm.header.gradient-1 {
-  background: var(--ssm-grad-1);
-}
-
-.ssm.header.gradient-2 {
-  background: var(--ssm-grad-2);
-}
-
-.ssm.header h2 {
-  margin: 0;
-  font-size: 1.5rem;
-}
-
-.ssm.header .sub {
-  font-size: 0.9rem;
-  opacity: 0.9;
-}
-
-/* ------------------------------
-   Panels + Cards
---------------------------------*/
-.ssm.panel, .ssm.card {
-  background: rgba(255,255,255,0.6);
-  backdrop-filter: blur(8px);
-  border-radius: var(--ssm-radius);
-  box-shadow: var(--ssm-shadow);
-  padding: 1rem 1.2rem;
-}
-
-.ssm.panel h3 {
-  margin-top: 0;
-}
-
-.ssm.card.kpi {
-  text-align: center;
-  padding: 1.2rem;
-}
-
-.ssm.card.kpi .kpi-label {
-  font-size: 0.9rem;
-  color: var(--ssm-muted);
-  margin-bottom: 0.3rem;
-}
-
-.ssm.card.kpi .kpi-value {
-  font-size: 1.6rem;
-  font-weight: bold;
-}
-
-.ssm.card.kpi-primary { border-top: 4px solid var(--ssm-primary); }
-.ssm.card.kpi-cyan { border-top: 4px solid var(--ssm-cyan); }
-.ssm.card.kpi-coral { border-top: 4px solid var(--ssm-coral); }
-
-/* ------------------------------
-   Tables
---------------------------------*/
-.ssm.table {
-  width: 100%;
-  border-collapse: collapse;
-  border-radius: var(--ssm-radius);
-  overflow: hidden;
-  background: #fff;
-}
-
-.ssm.table th, .ssm.table td {
-  padding: 0.6rem 0.8rem;
-  text-align: left;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.ssm.table.zebra tbody tr:nth-child(even) {
-  background: #f9fafb;
-}
-
-.ssm.table tbody tr:hover {
-  background: #f0f9ff;
-}
-
-/* ------------------------------
-   Pager
---------------------------------*/
-.ssm.pager {
-  margin-top: 0.5rem;
-  text-align: center;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.ssm.pager .btn {
-  background: var(--ssm-primary);
-  color: #fff;
-  border: none;
-  padding: 0.3rem 0.7rem;
-  border-radius: 999px;
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-
-.ssm.pager .btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-/* ------------------------------
-   Forms
---------------------------------*/
-.ssm.form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
-}
-
-.ssm.form label {
-  display: flex;
-  flex-direction: column;
-  font-size: 0.9rem;
-}
-
-.ssm.form input,
-.ssm.form select,
-.ssm.form textarea {
-  padding: 0.5rem;
-  border: 1px solid #d1d5db;
-  border-radius: var(--ssm-radius);
-  font-size: 0.95rem;
-}
-
-.ssm.form input:focus,
-.ssm.form select:focus,
-.ssm.form textarea:focus {
-  outline: 2px solid var(--ssm-primary);
-  outline-offset: 1px;
-}
-
-.ssm.form .actions {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.ssm.form .form-note {
-  font-size: 0.85rem;
-  color: var(--ssm-muted);
-}
-
-/* ------------------------------
-   Buttons
---------------------------------*/
-.button.ssm {
-  background: var(--ssm-primary);
-  color: #fff !important;
-  border: none;
-  border-radius: var(--ssm-radius);
-  padding: 0.5rem 1rem;
-  transition: background 0.2s;
-}
-
-.button.ssm:hover {
-  background: #6430d9;
-}
-
-.button.ssm.pill {
-  border-radius: 999px;
-  margin: 0.25rem;
-}
-
-/* ------------------------------
-   POS Layout
---------------------------------*/
-.ssm.keypad {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.ssm.total-bar {
-  font-size: 1.4rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 1rem 0;
-  padding: 0.8rem;
-  background: var(--ssm-grad-1);
-  color: #fff;
-  border-radius: var(--ssm-radius);
-}
-
-/* ------------------------------
-   Alerts
---------------------------------*/
-.ssm.alert {
-  padding: 1rem;
-  border-radius: var(--ssm-radius);
-  margin: 1rem 0;
-  background: #fff0f0;
-  border-left: 5px solid var(--ssm-coral);
-}
-
-.ssm.alert.error {
-  background: #fff0f0;
-  border-left-color: var(--ssm-coral);
-}
-
-/* ------------------------------
-   Loader
---------------------------------*/
-#ssm-loader {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%;
-  height: 100%;
-  display: none;
-  justify-content: center;
-  align-items: center;
-  backdrop-filter: blur(4px);
-  background: rgba(255,255,255,0.5);
-  z-index: 9999;
-}
-
-#ssm-loader.on {
-  display: flex;
-}
-
-.ssm-spinner {
-  width: 32px;
-  height: 32px;
-  border: 4px solid rgba(0,0,0,0.1);
-  border-top: 4px solid var(--ssm-primary);
-  border-radius: 50%;
-  animation: ssm-spin 0.8s linear infinite;
-}
-
-@keyframes ssm-spin {
-  to { transform: rotate(360deg); }
-}
-
-.ssm-loader-text {
-  margin-left: 0.8rem;
-  font-weight: 500;
-  color: var(--ssm-text);
-}
-
-/* ------------------------------
-   Responsive
---------------------------------*/
-@media (max-width: 768px) {
-  .ssm.grid.two {
-    grid-template-columns: 1fr;
+  // -----------------------------
+  // Guard: ssmData must exist
+  // -----------------------------
+  const hasData = typeof window.ssmData === 'object' && !!window.ssmData.ajaxUrl;
+  if (!hasData) {
+    console.warn('[Parlor Pro] ssmData غائب ہے — (wp_localize_script) چیک کریں۔');
+    return;
   }
 
-  .ssm.table th, .ssm.table td {
-    font-size: 0.85rem;
-    padding: 0.4rem;
+  // -----------------------------
+  // Utilities
+  // -----------------------------
+  const $doc = jQuery(document);
+
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
   }
 
-  .ssm.header h2 {
-    font-size: 1.2rem;
+  function money(val) {
+    const n = Number(val || 0);
+    return n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
-}
 
-/* ------------------------------
-   Focus Visible
---------------------------------*/
-:focus-visible {
-  outline: 2px solid var(--ssm-cyan);
-  outline-offset: 2px;
-}
+  function getQueryParam(key) {
+    const url = new URL(window.location.href);
+    return url.searchParams.get(key);
+  }
+
+  function ariaLiveRegion() {
+    let $region = jQuery('#ssm-aria-live');
+    if (!$region.length) {
+      $region = jQuery('<div id="ssm-aria-live" class="screen-reader-text" aria-live="polite" aria-atomic="true"></div>');
+      jQuery('body').append($region);
+    }
+    return $region;
+  }
+
+  function announce(msg) {
+    ariaLiveRegion().text(msg);
+  }
+
+  function loader(on = true) {
+    let $el = jQuery('#ssm-loader');
+    if (on) {
+      if (!$el.length) {
+        $el = jQuery('<div id="ssm-loader" class="ssm ssm-loader" role="status" aria-live="polite"><span class="ssm-spinner" aria-hidden="true"></span><span class="ssm-loader-text"></span></div>');
+        jQuery('body').append($el);
+      }
+      $el.find('.ssm-loader-text').text(ssmData?.i18n?.loading || 'لوڈ ہو رہا ہے...');
+      $el.addClass('on');
+    } else {
+      $el.removeClass('on');
+    }
+  }
+
+  function wpAjax(action, payload = {}, method = 'POST') {
+    const data = {
+      action,
+      nonce: ssmData.nonce,
+      ...payload
+    };
+    return jQuery.ajax({
+      url: ssmData.ajaxUrl,
+      method,
+      data,
+      dataType: 'json'
+    }).then((res) => {
+      if (!res || res.success !== true) {
+        const msg = res && res.data && res.data.message ? res.data.message : (ssmData?.i18n?.error || 'کوئی مسئلہ آ گیا ہے');
+        return jQuery.Deferred().reject({ message: msg }).promise();
+      }
+      return res.data;
+    });
+  }
+
+  /**
+   * mountTemplate:
+   * موجودہ .wrap کے اندر ایک root کنٹینر بناتا ہے تاکہ JS UI محفوظ طریقے سے انجیکٹ ہو۔
+   * اگر template (PHP) نے پہلے ہی HTML ڈالا ہو تو ہم اسے enhance کرتے ہیں۔
+   */
+  function mountTemplate(rootId, titleText) {
+    const $wrap = jQuery('.wrap');
+    if (!$wrap.length) {
+      console.warn('[Parlor Pro] .wrap نہیں ملی (WordPress admin screen)۔');
+      return null;
+    }
+    let $root = jQuery(`#${rootId}`);
+    if (!$root.length) {
+      $root = jQuery(`<div id="${rootId}" class="ssm ssm-root" tabindex="-1" aria-label="${escapeHtml(titleText || 'Parlor Pro')}"></div>`);
+      $wrap.append($root);
+    }
+    try { $root[0].focus(); } catch (e) {}
+    return $root;
+  }
+
+  // -----------------------------
+  // Shared Widgets
+  // -----------------------------
+  function renderKpiCard(label, value, accent = 'primary') {
+    return `
+      <div class="ssm card kpi kpi-${accent}" role="group" aria-label="${escapeHtml(label)}">
+        <div class="kpi-label">${escapeHtml(label)}</div>
+        <div class="kpi-value">${escapeHtml(value)}</div>
+      </div>
+    `;
+  }
+
+  function renderPager(state) {
+    const { page, per_page, total } = state;
+    const pages = Math.max(1, Math.ceil(total / per_page));
+    const prevDisabled = page <= 1 ? 'disabled' : '';
+    const nextDisabled = page >= pages ? 'disabled' : '';
+    return `
+      <div class="ssm pager" role="navigation" aria-label="صفحہ بندی">
+        <button type="button" class="button ssm btn prev" data-page="${page - 1}" ${prevDisabled} aria-label="پچھلا">
+          ‹
+        </button>
+        <span class="ssm pager-info">${page} / ${pages}</span>
+        <button type="button" class="button ssm btn next" data-page="${page + 1}" ${nextDisabled} aria-label="اگلا">
+          ›
+        </button>
+      </div>
+    `;
+  }
+
+  // -----------------------------
+  // Screen: Dashboard
+  // -----------------------------
+  function initDashboard() {
+    const $root = mountTemplate('ssm-dashboard-root', 'ڈیش بورڈ');
+    if (!$root) return;
+
+    loader(true);
+    wpAjax('pp_get_dashboard')
+      .then(({ data }) => data || {})
+      .then((d) => {
+        const html = `
+          <div class="ssm header gradient-1">
+            <h2>Parlor Pro — Dashboard</h2>
+            <div class="sub">${escapeHtml(ssmData.siteUrl || '')}</div>
+          </div>
+          <div class="ssm grid kpis">
+            ${renderKpiCard('کل کسٹمرز', String(d.total_clients || 0), 'primary')}
+            ${renderKpiCard('آج کی اپائنٹمنٹس', String(d.today_appts || 0), 'cyan')}
+            ${renderKpiCard('آج کی سیلز', money(d.today_sales || 0), 'coral')}
+          </div>
+          <div class="ssm panel">
+            <h3>حالیہ سرگرمی</h3>
+            <p class="muted">ڈیمو پینل — مزید تفصیل رپورٹس میں دستیاب ہوگی۔</p>
+          </div>
+        `;
+        $root.html(html);
+        announce('ڈیش بورڈ لوڈ ہو گیا');
+      })
+      .fail((err) => {
+        $root.html(`<div class="ssm alert error" role="alert">${escapeHtml(err?.message || ssmData?.i18n?.error)}</div>`);
+      })
+      .always(() => loader(false));
+  }
+
+  // -----------------------------
+  // Screen: Calendar (services list + create appointment)
+  // -----------------------------
+  function initCalendar() {
+    const $root = mountTemplate('ssm-calendar-root', 'کیلنڈر');
+    if (!$root) return;
+
+    const state = { page: 1, per_page: 5, total: 0, rows: [] };
+
+    function draw() {
+      const rows = state.rows.map((r) => `
+        <tr>
+          <td>${escapeHtml(String(r.id))}</td>
+          <td>${escapeHtml(r.title)}</td>
+          <td>${money(r.price)}</td>
+          <td>${escapeHtml(String(r.duration))} منٹ</td>
+        </tr>
+      `).join('');
+
+      const table = `
+        <table class="ssm table zebra" aria-describedby="services-caption">
+          <caption id="services-caption" class="screen-reader-text">فعال سروسز</caption>
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">سروس</th>
+              <th scope="col">قیمت</th>
+              <th scope="col">دورانیہ</th>
+            </tr>
+          </thead>
+          <tbody>${rows || '<tr><td colspan="4" class="muted">کوئی فعال سروس نہیں ملی</td></tr>'}</tbody>
+        </table>
+      `;
+
+      const pager = renderPager({ page: state.page, per_page: state.per_page, total: state.total });
+
+      const form = `
+        <form class="ssm form" id="ssm-appt-form" novalidate>
+          <fieldset>
+            <legend>نئی اپائنٹمنٹ</legend>
+            <label>کلائنٹ آئی ڈی
+              <input type="number" name="client_id" min="1" required />
+            </label>
+            <label>سروس آئی ڈی
+              <input type="number" name="service_id" min="1" required />
+            </label>
+            <label>اسٹاف آئی ڈی
+              <input type="number" name="staff_id" min="1" required />
+            </label>
+            <label>آغاز (YYYY-MM-DD HH:MM:SS)
+              <input type="text" name="start_time" placeholder="2025-01-01 10:00:00" required />
+            </label>
+            <label>اختتام (YYYY-MM-DD HH:MM:SS)
+              <input type="text" name="end_time" placeholder="2025-01-01 11:00:00" required />
+            </label>
+            <label>اسٹیٹس
+              <select name="status">
+                <option value="pending">pending</option>
+                <option value="confirmed">confirmed</option>
+                <option value="completed">completed</option>
+                <option value="cancelled">cancelled</option>
+              </select>
+            </label>
+            <label>نوٹس
+              <textarea name="notes" rows="2"></textarea>
+            </label>
+            <div class="actions">
+              <button type="submit" class="button button-primary">محفوظ کریں</button>
+              <span class="ssm form-note" aria-live="polite"></span>
+            </div>
+          </fieldset>
+        </form>
+      `;
+
+      $root.html(`
+        <div class="ssm header gradient-1">
+          <h2>Calendar</h2>
+          <div class="sub">فعال سروسز اور فوری اپائنٹمنٹ فارم</div>
+        </div>
+        <div class="ssm grid two">
+          <div class="ssm panel">
+            <h3>سروسز</h3>
+            <div class="table-wrap">${table}</div>
+            ${pager}
+          </div>
+          <div class="ssm panel">
+            ${form}
+          </div>
+        </div>
+      `);
+    }
+
+    function loadServices() {
+      loader(true);
+      return wpAjax('pp_get_services', { page_no: state.page, per_page: state.per_page }, 'GET')
+        .then(({ data }) => data || {})
+        .then((d) => {
+          state.total = Number(d.total || 0);
+          state.rows = Array.isArray(d.rows) ? d.rows : [];
+          draw();
+          announce('سروسز لوڈ ہو گئیں');
+        })
+        .fail((err) => {
+          $root.html(`<div class="ssm alert error" role="alert">${escapeHtml(err?.message || ssmData?.i18n?.error)}</div>`);
+        })
+        .always(() => loader(false));
+    }
+
+    // Delegated events
+    $root.on('click', '.pager .btn', function () {
+      const to = Number(jQuery(this).data('page'));
+      if (isNaN(to) || to < 1) return;
+      const pages = Math.max(1, Math.ceil(state.total / state.per_page));
+      if (to > pages) return;
+      state.page = to;
+      loadServices();
+    });
+
+    $root.on('submit', '#ssm-appt-form', function (e) {
+      e.preventDefault();
+      const $f = jQuery(this);
+      const formData = {
+        id: 0,
+        client_id: $f.find('[name="client_id"]').val(),
+        service_id: $f.find('[name="service_id"]').val(),
+        staff_id: $f.find('[name="staff_id"]').val(),
+        start_time: $f.find('[name="start_time"]').val(),
+        end_time: $f.find('[name="end_time"]').val(),
+        status: $f.find('[name="status"]').val(),
+        notes: $f.find('[name="notes"]').val()
+      };
+      loader(true);
+      wpAjax('pp_save_appointment', formData, 'POST')
+        .then(({ data }) => data || {})
+        .then((d) => {
+          $f[0].reset();
+          $f.find('.form-note').text(ssmData?.i18n?.saved || 'محفوظ ہو گیا');
+          announce('اپائنٹمنٹ محفوظ ہو گئی');
+        })
+        .fail((err) => {
+          $f.find('.form-note').text(err?.message || ssmData?.i18n?.error);
+        })
+        .always(() => loader(false));
+    });
+
+    // Initial load
+    loadServices();
+  }
+
+  // -----------------------------
+  // Screen: POS (UI-only stub — no AJAX call yet)
+  // -----------------------------
+  function initPOS() {
+    const $root = mountTemplate('ssm-pos-root', 'پی او ایس');
+    if (!$root) return;
+
+    const html = `
+      <div class="ssm header gradient-2">
+        <h2>Point of Sale</h2>
+        <div class="sub">فوری بلنگ انٹرفیس (ڈیمو)</div>
+      </div>
+      <div class="ssm grid two">
+        <div class="ssm panel">
+          <h3>آئٹمز</h3>
+          <div class="ssm keypad">
+            <button type="button" class="button ssm pill" data-price="500">ہیئر کٹ — 500</button>
+            <button type="button" class="button ssm pill" data-price="1200">فیشل — 1200</button>
+            <button type="button" class="button ssm pill" data-price="800">بلیچ — 800</button>
+          </div>
+        </div>
+        <div class="ssm panel">
+          <h3>ٹوٹل</h3>
+          <div class="ssm total-bar">
+            <span class="label">کل</span>
+            <span class="value" id="ssm-pos-total">0.00</span>
+          </div>
+          <div class="actions">
+            <button type="button" class="button button-primary" id="ssm-pos-pay">ادائیگی</button>
+            <span class="muted">(ڈیمو — ابھی کوئی (AJAX) کال نہیں)</span>
+          </div>
+        </div>
+      </div>
+    `;
+    $root.html(html);
+
+    let total = 0;
+    $root.on('click', '.keypad .pill', function () {
+      const price = Number(jQuery(this).data('price') || 0);
+      total += price;
+      $root.find('#ssm-pos-total').text(money(total));
+      announce(`کل ${money(total)}`);
+    });
+
+    $root.on('click', '#ssm-pos-pay', function () {
+      alert('یہ ڈیمو ہے — (save_order) (AJAX) مستقبل میں شامل کریں گے۔');
+    });
+  }
+
+  // -----------------------------
+  // Screen: Reports
+  // -----------------------------
+  function initReports() {
+    const $root = mountTemplate('ssm-reports-root', 'رپورٹس');
+    if (!$root) return;
+
+    function defaultRange() {
+      const now = new Date();
+      const y = now.getUTCFullYear();
+      const m = String(now.getUTCMonth() + 1).padStart(2, '0');
+      const first = `${y}-${m}-01`;
+      const lastDate = new Date(Date.UTC(y, now.getUTCMonth() + 1, 0)).getUTCDate();
+      const last = `${y}-${m}-${String(lastDate).padStart(2, '0')}`;
+      return { from: first, to: last };
+    }
+
+    const range = defaultRange();
+
+    function draw(d) {
+      const html = `
+        <div class="ssm header gradient-1">
+          <h2>Reports</h2>
+          <div class="sub">مدت منتخب کریں اور نتائج دیکھیں</div>
+        </div>
+        <div class="ssm panel">
+          <form id="ssm-report-form" class="ssm form">
+            <label>ابتداء
+              <input type="date" name="from" value="${escapeHtml(range.from)}" required />
+            </label>
+            <label>اختتام
+              <input type="date" name="to" value="${escapeHtml(range.to)}" required />
+            </label>
+            <button type="submit" class="button button-primary">فِلٹر</button>
+          </form>
+        </div>
+        <div class="ssm grid kpis">
+          ${renderKpiCard('مدت', `${escapeHtml(d?.range?.from || '')} → ${escapeHtml(d?.range?.to || '')}`, 'primary')}
+          ${renderKpiCard('کل سیلز', money(d?.total_sales || 0), 'coral')}
+          ${renderKpiCard('کل اپائنٹمنٹس', String(d?.appointments || 0), 'cyan')}
+        </div>
+      `;
+      $root.html(html);
+    }
+
+    function load() {
+      loader(true);
+      wpAjax('pp_get_reports', { from: range.from, to: range.to }, 'GET')
+        .then(({ data }) => data || {})
+        .then((d) => {
+          draw(d);
+          announce('رپورٹس لوڈ ہو گئیں');
+        })
+        .fail((err) => {
+          $root.html(`<div class="ssm alert error" role="alert">${escapeHtml(err?.message || ssmData?.i18n?.error)}</div>`);
+        })
+        .always(() => loader(false));
+    }
+
+    $root.on('submit', '#ssm-report-form', function (e) {
+      e.preventDefault();
+      const $f = jQuery(this);
+      range.from = $f.find('[name="from"]').val();
+      range.to = $f.find('[name="to"]').val();
+      load();
+    });
+
+    load();
+  }
+
+  // -----------------------------
+  // Screen: Settings (enhance)
+  // -----------------------------
+  function initSettings() {
+    const $wrap = jQuery('.wrap');
+    if (!$wrap.length) return;
+    $wrap.find('form[action="options.php"]').addClass('ssm form');
+    $wrap.prepend(`<div class="ssm header gradient-2"><h2>Settings</h2><div class="sub">جنرل آپشنز</div></div>`);
+  }
+
+  // -----------------------------
+  // Router (by page param)
+  // -----------------------------
+  function route() {
+    const page = getQueryParam('page') || '';
+    if (page === 'parlor-pro' || page === '') {
+      initDashboard();
+    } else if (page === 'parlor-pro-calendar') {
+      initCalendar();
+    } else if (page === 'parlor-pro-pos') {
+      initPOS();
+    } else if (page === 'parlor-pro-reports') {
+      initReports();
+    } else if (page === 'parlor-pro-settings') {
+      initSettings();
+    } else {
+      // Unknown page — no-op
+    }
+  }
+
+  // -----------------------------
+  // Boot
+  // -----------------------------
+  jQuery(() => {
+    try {
+      route();
+    } catch (e) {
+      console.error('[Parlor Pro] init error:', e);
+    }
+  });
+
+})();
+
+
+// =============================
+// Services Catalog Panel (Additive)
+// =============================
+(function(){
+  const $ = window.jQuery || function(s){ return document.querySelector(s); };
+
+  function renderServicesPanel(root) {
+    if (!root) return;
+    const panel = document.createElement('div');
+    panel.className = 'ssm card ssm-services-panel';
+    panel.innerHTML = '<div class="title">سروسز کی کیٹیگریز</div><div class="ssm-services-body"><div class="loader">لوڈ ہو رہا ہے…</div></div>';
+    root.appendChild(panel);
+
+    // Fetch catalog
+    const url = (window.ssmData && window.ssmData.ajaxUrl) ? window.ssmData.ajaxUrl : '';
+    if (!url) return;
+    const params = new URLSearchParams({ action: 'pp_get_services_catalog', _wpnonce: (window.ssmData && window.ssmData.nonce) || '' });
+
+    fetch(url + '?' + params.toString(), { credentials: 'same-origin' })
+      .then(r => r.json())
+      .then(payload => {
+        const body = panel.querySelector('.ssm-services-body');
+        if (!payload || !payload.success) {
+          body.textContent = 'ڈیٹا حاصل نہیں ہو سکا۔';
+          return;
+        }
+        const cat = payload.data.catalog || {};
+        const wrapper = document.createElement('div');
+        wrapper.className = 'ssm-services-grid';
+
+        Object.keys(cat).forEach(key => {
+          const c = cat[key];
+          const card = document.createElement('div');
+          card.className = 'ssm service-cat';
+          const h = document.createElement('h4');
+          h.textContent = c.title || key;
+          card.appendChild(h);
+
+          const ul = document.createElement('ul');
+          (c.items || []).forEach(it => {
+            const li = document.createElement('li');
+            li.innerHTML = '<span class="n"></span><code class="cd"></code>';
+            li.querySelector('.n').textContent = it.name || '';
+            li.querySelector('.cd').textContent = it.code || '';
+            ul.appendChild(li);
+          });
+          card.appendChild(ul);
+          wrapper.appendChild(card);
+        });
+
+        body.innerHTML = '';
+        body.appendChild(wrapper);
+      })
+      .catch(() => {
+        const body = panel.querySelector('.ssm-services-body');
+        body.textContent = 'کچھ خرابی پیش آگئی۔';
+      });
+  }
+
+  // Try to mount on dashboard if present
+  jQuery(function(){
+    const root = document.getElementById('ssm-dashboard-root');
+    if (root) renderServicesPanel(root);
+  });
+})();
