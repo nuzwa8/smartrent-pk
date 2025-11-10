@@ -1,1 +1,80 @@
+/** Part 6 — Global CSS Variables and Core Styles */
 
+/* 🟢 یہاں سے Global CSS Variables شروع ہو رہا ہے */
+:root {
+    /* Color Tokens */
+    --ssm-color-primary: #0073aa; /* WP Blue */
+    --ssm-color-secondary: #00A98F; /* Teal/Green Accent */
+    --ssm-color-success: #28a745;
+    --ssm-color-danger: #dc3545;
+    --ssm-color-warning: #ffc107;
+    --ssm-color-info: #17a2b8;
+    --ssm-color-text: #333;
+    --ssm-color-light: #f8f9fa;
+    --ssm-color-dark: #212529;
+
+    /* Spacing & Layout */
+    --ssm-space-xs: 4px;
+    --ssm-space-sm: 8px;
+    --ssm-space-md: 16px;
+    --ssm-space-lg: 24px;
+    --ssm-space-xl: 32px;
+
+    /* Border Radius */
+    --ssm-border-radius: 6px;
+    --ssm-border-color: #ddd;
+    --ssm-shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+/* 🔴 یہاں پر Global CSS Variables ختم ہو رہا ہے */
+
+/* 🟢 یہاں سے Global Core Styles شروع ہو رہا ہے */
+.ssm-wrap h2 {
+    border-bottom: 1px solid var(--ssm-border-color);
+    padding-bottom: var(--ssm-space-sm);
+    margin-bottom: var(--ssm-space-lg);
+}
+
+.ssm-root {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+    color: var(--ssm-color-text);
+}
+
+.ssm-panel {
+    background-color: #fff;
+    border: 1px solid var(--ssm-border-color);
+    border-radius: var(--ssm-border-radius);
+    padding: var(--ssm-space-md);
+    box-shadow: var(--ssm-shadow-sm);
+}
+
+.ssm-loading, .ssm-error-message {
+    padding: var(--ssm-space-xl);
+    text-align: center;
+    font-size: 1.1em;
+    color: var(--ssm-color-dark);
+}
+
+/* Button Styling */
+.ssm-button-primary {
+    background-color: var(--ssm-color-primary);
+    color: white !important;
+    border-color: var(--ssm-color-primary);
+    text-decoration: none;
+    padding: 8px 15px;
+    border-radius: var(--ssm-border-radius);
+    display: inline-block;
+    cursor: pointer;
+    line-height: 1;
+}
+.ssm-button-primary:hover {
+    background-color: #005a87;
+    border-color: #005a87;
+}
+
+/* Status Badges */
+.ssm-status-paid { background-color: var(--ssm-color-success); color: white; padding: 3px 6px; border-radius: 4px; font-size: 0.8em; }
+.ssm-status-due { background-color: var(--ssm-color-danger); color: white; padding: 3px 6px; border-radius: 4px; font-size: 0.8em; }
+.ssm-alert-pending { color: var(--ssm-color-warning); font-weight: bold; }
+
+/* 🔴 یہاں پر Global Core Styles ختم ہو رہا ہے */
+/* ✅ Syntax verified block end. */
